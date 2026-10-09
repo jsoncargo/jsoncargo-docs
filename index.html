@@ -1,0 +1,1611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Option B - Metal Greys | JSONCargo API</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Fustat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:        #101015;
+    --bg2:       #232326;
+    --bg3:       #343437;
+    --surface:   #1c1c1f;
+    --border:    rgba(255,255,255,0.1);
+    --accent:    #ff4e00;
+    --accent2:   #ff7a3d;
+    --text:      #f5f5ea;
+    --text-muted:#b8a8a0;
+    --green:     #222f1c;
+    --green-fg:  #83d640;
+    --red:       #361212;
+    --red-fg:    #ff6b6b;
+    --amber:     #2e2208;
+    --amber-fg:  #ffea05;
+    --code-bg:   #0d0d10;
+    --radius:    8px;
+    --sidebar-w: 240px;
+    --context-w: 220px;
+    --font: 'Fustat', system-ui, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
+
+  /* TOPBAR */
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: 56px; background: var(--bg2); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 24px; gap: 16px;
+  }
+  .topbar-inner { width: 100%; max-width: 1280px; margin: 0 auto; display: flex; align-items: center; gap: 16px; }
+  .topbar-logo { display: flex; align-items: center; text-decoration: none; }
+  .topbar-logo img { height: 34px; width: auto; display: block; }
+  .topbar-logo span { color: var(--accent); }
+  .topbar-badge { font-size: 11px; font-weight: 600; background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 99px; }
+  .topbar-links { margin-left: auto; display: flex; align-items: center; gap: 22px; }
+  .topbar-links a { color: var(--text-muted); text-decoration: none; font-size: 14px; transition: color .2s; }
+  .topbar-links a:hover { color: var(--text); }
+  .topbar-cta { background: var(--accent); color: #fff !important; padding: 6px 16px; border-radius: var(--radius); font-weight: 600; font-size: 13px; }
+  .topbar-cta:hover { background: var(--accent2) !important; text-decoration: none; }
+  .topbar a:focus-visible { outline: 2px solid var(--accent2); outline-offset: 3px; border-radius: 4px; }
+  html { scroll-padding-top: 72px; }
+  body { padding-top: 56px; }
+
+  /* THREE-COLUMN LAYOUT */
+  .layout { display: grid; grid-template-columns: var(--sidebar-w) 1fr var(--context-w); min-height: 100vh; max-width: 1280px; margin: 0 auto; }
+
+  /* SIDEBAR */
+  .sidebar {
+    position: sticky; top: 56px; height: calc(100vh - 56px);
+    overflow-y: auto; padding: 24px 0 40px;
+    border-right: 1px solid var(--border);
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .sidebar-label { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-muted); padding: 16px 16px 6px; }
+  .sidebar a { display: block; padding: 7px 16px; font-size: 13px; color: var(--text-muted); text-decoration: none; border-left: 2px solid transparent; transition: all .15s; }
+  .sidebar a:hover { background: var(--bg3); color: var(--text); }
+  .sidebar a.active { background: rgba(255,105,0,0.1); color: var(--accent); border-left-color: var(--accent); font-weight: 600; }
+
+  /* MAIN */
+  .main { padding: 40px 48px 80px; min-width: 0; }
+
+  /* CONTEXT PANEL */
+  .context-panel {
+    position: sticky; top: 56px; height: calc(100vh - 56px);
+    overflow-y: auto; padding: 24px 16px 40px;
+    border-left: 1px solid var(--border);
+  }
+  .context-panel::-webkit-scrollbar { width: 4px; }
+  .context-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .context-title { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; }
+  .context-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 12px; transition: opacity .3s; }
+  .context-card.hidden { display: none; }
+  .ctx-state.hidden { display: none; }
+  .context-card table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .context-card th { color: var(--accent); font-weight: 600; text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--border); font-size: 11px; text-transform: uppercase; letter-spacing: 0.3px; }
+  .context-card td { color: var(--text-muted); padding: 4px 6px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 11px; }
+  .context-card td:first-child { color: var(--text); font-family: monospace; }
+  .context-card tr:last-child td { border-bottom: none; }
+  .context-credit-endpoint { font-size: 12px; font-weight: 700; color: var(--accent); margin-bottom: 6px; line-height: 1.4; min-height: 4px; }
+
+  /* DOC SECTIONS */
+  .doc-section { padding-top: 24px; margin-bottom: 64px; }
+  .doc-section + .doc-section { border-top: 1px solid var(--border); padding-top: 64px; }
+
+  /* TYPOGRAPHY */
+  h1 { font-size: 30px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; margin-bottom: 12px; }
+  h2 { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; margin: 36px 0 12px; }
+  h3 { font-size: 13px; font-weight: 700; color: var(--accent); margin: 24px 0 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+  p { color: var(--text-muted); margin-bottom: 14px; }
+  p a, a { color: var(--accent); text-decoration: none; }
+  p a:hover, a:hover { text-decoration: none; color: var(--accent2); }
+  strong { color: var(--accent); font-weight: 600; }
+  code { background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px; font-family: monospace; font-size: 13px; color: var(--text); }
+
+  /* ENDPOINT CARD */
+  .endpoint-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 24px; overflow: hidden; }
+  .endpoint-header { display: flex; align-items: center; gap: 12px; padding: 13px 18px; background: var(--bg3); border-bottom: 1px solid var(--border); }
+  .method-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; background: rgba(255,105,0,0.18); color: var(--accent); border: 1px solid rgba(255,105,0,0.3); flex-shrink: 0; }
+  .endpoint-url { font-family: monospace; font-size: 13px; color: var(--text); word-break: break-all; }
+  .endpoint-body { padding: 18px; }
+
+
+  /* INFO BOX */
+  .info-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 12px; font-family: monospace; font-size: 13px; color: var(--text); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .copy-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 14px; padding: 4px; border-radius: 4px; transition: color .2s; flex-shrink: 0; }
+  .copy-btn:hover { color: var(--accent); }
+  .copy-btn.copied { color: var(--accent); }
+
+  /* PARAMS */
+  .param-list { margin: 6px 0 14px; }
+  .param-item { display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .param-item:last-child { border-bottom: none; }
+  .param-name { font-family: monospace; font-size: 13px; font-weight: 600; color: var(--text); }
+  .param-type { font-size: 11px; color: var(--text-muted); background: var(--bg3); padding: 1px 7px; border-radius: 4px; }
+  .param-required { font-size: 11px; font-weight: 600; color: var(--accent); background: rgba(255,105,0,0.12); padding: 1px 7px; border-radius: 4px; }
+  .param-optional { font-size: 11px; color: var(--text-muted); background: var(--bg3); padding: 1px 7px; border-radius: 4px; }
+  .param-desc { font-size: 13px; color: var(--text-muted); width: 100%; }
+
+  /* RESPONSES */
+  .response-item { border-radius: 6px; margin-bottom: 6px; overflow: hidden; }
+  .response-trigger { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; cursor: pointer; font-size: 13px; font-weight: 500; border: 1px solid transparent; border-radius: 6px; transition: border-color .2s; }
+  .response-trigger:hover { border-color: rgba(255,255,255,0.15); }
+  .response-200 { background: var(--green); color: var(--green-fg); }
+  .response-400, .response-404 { background: var(--red); color: var(--red-fg); }
+  .response-429 { background: var(--amber); color: var(--amber-fg); }
+  .response-500 { background: var(--red); color: var(--red-fg); }
+  .response-401, .response-502 { background: var(--red); color: var(--red-fg); }
+  .resp-note { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
+  .resp-ex-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin: 10px 0 -4px; }
+  .response-content pre { padding: 10px 0; }
+  .response-403 { background: var(--red); color: var(--red-fg); }
+  .response-content .table-wrap { margin: 4px 0 12px; }
+  .td-msg { font-family: monospace; font-size: 12px; color: var(--text); }
+  .msg-ph { color: var(--accent2); }
+  .response-icon { font-size: 16px; transition: transform .2s; }
+  .response-content { display: none; padding: 12px 16px; background: var(--code-bg); border: 1px solid var(--border); border-top: none; border-radius: 0 0 6px 6px; }
+  .response-item.open .response-content { display: block; }
+  .response-item.open .response-icon { transform: rotate(45deg); }
+
+  /* TABLES */
+  .table-wrap { overflow-x: auto; margin: 12px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { background: var(--bg3); color: var(--accent); font-weight: 600; text-align: left; padding: 9px 14px; border-bottom: 1px solid var(--border); font-size: 11px; letter-spacing: 0.4px; text-transform: uppercase; }
+  tbody td { padding: 9px 14px; border-bottom: 1px solid var(--border); color: var(--text-muted); font-size: 13px; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: rgba(255,255,255,0.02); }
+  .td-name { color: var(--text); font-family: monospace; }
+
+  /* CODE BLOCKS */
+  .code-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius); margin: 14px 0; overflow: hidden; }
+  .code-header { display: flex; align-items: center; justify-content: space-between; padding: 7px 14px; background: var(--bg3); border-bottom: 1px solid var(--border); }
+  .code-lang { font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase; }
+  pre { padding: 18px; overflow-x: auto; font-family: monospace; font-size: 13px; line-height: 1.6; color: #e2e8f0; }
+  .hl-key { color: #93c5fd; }
+  .hl-str { color: #86efac; }
+  .hl-num { color: #fbbf24; }
+  .hl-null { color: #94a3b8; }
+  .hl-kw { color: #c084fc; }
+  .hl-url { color: var(--accent2); }
+  .hl-header { color: #f0abfc; }
+
+  /* LANGUAGE TABS */
+  .lang-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: -1px; }
+  .lang-tab { padding: 6px 12px; border-radius: 6px 6px 0 0; font-size: 12px; font-weight: 600; cursor: pointer; background: var(--bg3); color: var(--text-muted); border: 1px solid var(--border); border-bottom: 1px solid var(--bg3); transition: color .2s; }
+  .lang-tab.active { background: var(--code-bg); color: var(--accent); border-bottom-color: var(--code-bg); }
+  .lang-panel { display: none; }
+  .lang-panel.active { display: block; }
+
+  /* ALERTS */
+  .alert { border-radius: var(--radius); padding: 12px 16px; margin: 14px 0; font-size: 14px; border: 1px solid; }
+  .alert-info { background: rgba(6,147,227,0.08); border-color: rgba(6,147,227,0.25); color: #93c5fd; }
+  .alert-warning { background: rgba(255,105,0,0.08); border-color: rgba(255,105,0,0.25); color: var(--accent2); }
+  .alert-label { font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.8px; margin-bottom: 4px; }
+
+  /* SHIPPING LINE BADGE */
+  .sl-badge { display: inline-block; font-family: monospace; font-size: 11px; font-weight: 700; background: rgba(255,105,0,0.1); color: var(--accent); border: 1px solid rgba(255,105,0,0.22); padding: 3px 0; border-radius: 4px; width: 110px; text-align: center; }
+
+  /* ERROR CARDS */
+  .error-cards { display: flex; flex-direction: column; gap: 8px; margin: 14px 0; }
+  .error-card { display: flex; align-items: flex-start; gap: 14px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; transition: border-color .2s; }
+  .error-card:hover { border-color: rgba(255,78,0,0.25); }
+  .error-card-icon { font-size: 16px; color: var(--accent); flex-shrink: 0; width: 24px; text-align: center; margin-top: 1px; }
+  .error-card-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .error-card-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+  /* CONTACT */
+  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+  .contact-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
+  .contact-card-icon { font-size: 22px; margin-bottom: 8px; }
+  .contact-card-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); margin-bottom: 4px; }
+  .contact-card a { color: var(--accent); font-size: 14px; }
+
+  /* USAGE GRID */
+  .usage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0; }
+  .usage-card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+  .usage-card-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); margin-bottom: 4px; }
+  .usage-card-val { font-size: 22px; font-weight: 800; color: var(--text); font-family: monospace; }
+  .usage-card-sub { font-size: 11px; color: var(--text-muted); }
+
+  @media (max-width: 1100px) {
+    .layout { grid-template-columns: var(--sidebar-w) 1fr; }
+    .context-panel { display: none; }
+  }
+  @media (max-width: 700px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .main { padding: 24px 18px 60px; }
+    .topbar { padding: 0 16px; }
+    .topbar-links { gap: 14px; }
+    .topbar-links .tl-secondary { display: none; }
+    .topbar-logo img { height: 30px; }
+    .contact-grid { grid-template-columns: 1fr; }
+  }
+
+  /* SDK TABS */
+  .sdk-tabs { display: flex; gap: 4px; margin-bottom: -1px; }
+  .sdk-tab { padding: 8px 20px; border-radius: 6px 6px 0 0; font-size: 13px; font-weight: 600; cursor: pointer; background: var(--bg3); color: var(--text-muted); border: 1px solid var(--border); border-bottom-color: var(--bg3); transition: color .2s, background .2s; font-family: var(--font); }
+  .sdk-tab.active { background: var(--bg2); color: var(--accent); border-bottom-color: var(--bg2); }
+  .sdk-tab:hover:not(.active) { color: var(--text); }
+  .sdk-panel { display: none; background: var(--bg2); border: 1px solid var(--border); border-radius: 0 var(--radius) var(--radius) var(--radius); padding: 20px; }
+  .sdk-panel.active { display: block; }
+  .sdk-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  .sdk-meta-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); }
+  .sdk-meta a { font-size: 13px; font-family: monospace; color: var(--accent); }
+</style>
+</head>
+<body>
+
+
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="topbar-logo" href="https://jsoncargo.com/" aria-label="JSONCargo home"><img src="data:image/webp;base64,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" alt="JSONCargo" width="81" height="34"></a>
+    <nav class="topbar-links" aria-label="Main">
+      <a class="tl-secondary" href="https://jsoncargo.com/pricing-plans/">Pricing</a>
+      <a class="tl-secondary" href="https://jsoncargo.com/contact-us/">Contact</a>
+      <a href="https://jsoncargo.com/my-account/">Login</a>
+      <a class="topbar-cta" href="https://jsoncargo.com/pricing-plans/">Get API Key</a>
+    </nav>
+  </div>
+</header>
+
+<div class="layout">
+
+<!-- LEFT SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-label">Overview</div>
+  <a href="#getting-started">Getting Started</a>
+  <a href="#authentication">Authentication</a>
+  <a href="#shipping-lines">Shipping Lines</a>
+  <a href="#usage">API Usage</a>
+  <a href="#errors">Common Errors</a>
+  <div class="sidebar-label">Container</div>
+  <a href="#endpoint-1">1. Get Container Details</a>
+  <a href="#endpoint-2">2. Get Containers from BoL</a>
+  <div class="sidebar-label">Vessel</div>
+  <a href="#endpoint-3">3. Basic Vessel Tracking</a>
+  <a href="#endpoint-4">4. Pro Vessel Tracking</a>
+  <a href="#endpoint-5">5. Bulk Vessel Tracking</a>
+  <a href="#endpoint-6">6. Vessel Finder</a>
+  <a href="#endpoint-7">7. Vessel Specs</a>
+  <div class="sidebar-label">Other</div>
+  <a href="#endpoint-8">8. Port Finder</a>
+  <a href="#endpoint-9">9. Terminal Finder</a>
+  <a href="#endpoint-10">10. API Key Stats</a>
+  <div class="sidebar-label">Resources</div>
+  <a href="#languages">Code Examples</a>
+  <a href="#sdks">SDKs & Libraries</a>
+  <a href="#support">Support</a>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <section class="doc-section" id="getting-started">
+    <h1>Documentation</h1>
+    <p>JSONCargo Container &amp; Vessel Tracking API gives you real-time shipment and vessel tracking data from the world's major shipping lines. This reference covers every endpoint, parameter, and response field.</p>
+    <div class="alert alert-info">
+      <div class="alert-label">Quick Start</div>
+      Get your API key from the <a href="https://jsoncargo.com/pricing-plans/">pricing page</a>, then pass it as the <code>x-api-key</code> header in every request.
+    </div>
+
+    <h2 id="authentication">Authentication</h2>
+    <p>All API requests must include your API key in the request header. You can obtain a key by subscribing to any plan on our <a href="https://jsoncargo.com/pricing-plans/">pricing page</a> - your key will arrive by email immediately after subscribing.</p>
+    <h3>Header Parameter</h3>
+    <div class="info-box">
+      <span><span class="hl-header">x-api-key</span>: <span class="hl-str">YOUR_API_KEY</span></span>
+      <button class="copy-btn" onclick="copyText('x-api-key', this)">&#x29C9;</button>
+    </div>
+
+    <h2 id="shipping-lines">Shipping Line Compatibility</h2>
+    <p>Container tracking is currently supported for the shipping lines listed below. Use the <strong>API Parameter</strong> value exactly as shown when specifying <code>shipping_line</code> in requests.</p>
+    <div class="table-wrap">
+      <table class="shipping-table">
+        <colgroup>
+          <col style="width:42%">
+          <col style="width:26%">
+          <col style="width:32%">
+        </colgroup>
+        <thead><tr><th>Shipping Line</th><th>Alternate Name</th><th>API Parameter</th></tr></thead>
+        <tbody>
+          <tr><td class="td-name">A.P. Moller - Maersk</td><td>Maersk</td><td><span class="sl-badge">MAERSK</span></td></tr>
+          <tr><td class="td-name">Hapag-Lloyd</td><td>Hapag-Lloyd</td><td><span class="sl-badge">HAPAG_LLOYD</span></td></tr>
+          <tr><td class="td-name">Hyundai Merchant Marine</td><td>HMM</td><td><span class="sl-badge">HMM</span></td></tr>
+          <tr><td class="td-name">Ocean Network Express</td><td>ONE</td><td><span class="sl-badge">ONE</span></td></tr>
+          <tr><td class="td-name">Evergreen Marine Corp</td><td>Evergreen</td><td><span class="sl-badge">EVERGREEN</span></td></tr>
+          <tr><td class="td-name">Mediterranean Shipping Company</td><td>MSC</td><td><span class="sl-badge">MSC</span></td></tr>
+          <tr><td class="td-name">Compagnie Maritime d&#x27;Affretement<br><span style="color:var(--text-muted);font-size:12px">Compagnie Generale Maritime</span></td><td>CMA CGM</td><td><span class="sl-badge">CMA_CGM</span></td></tr>
+          <tr><td class="td-name">COSCO SHIPPING Lines Co</td><td>Cosco</td><td><span class="sl-badge">COSCO</span></td></tr>
+          <tr><td class="td-name">Zim Integrated Shipping Services</td><td>ZIM</td><td><span class="sl-badge">ZIM</span></td></tr>
+          <tr><td class="td-name">YangMing Marine Transport Corp</td><td>Yang Ming</td><td><span class="sl-badge">YANG_MING</span></td></tr>
+          <tr><td class="td-name">Pacific International Lines</td><td>PIL</td><td><span class="sl-badge">PIL</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>This list is not final. We are continuously working to expand shipping line support. If you have specific lines you'd like to see added, send your feedback to <a href="mailto:info@jsoncargo.com">info@jsoncargo.com</a></p>
+
+    <h2 id="usage">API Usage</h2>
+    <p>Each API request to our system counts as one API call, regardless of whether it's for a new or previously tracked container or vessel.</p>
+    <div class="usage-grid">
+      <div class="usage-card"><div class="usage-card-label">Per Request</div><div class="usage-card-val">1</div><div class="usage-card-sub">API call per container or vessel lookup</div></div>
+      <div class="usage-card"><div class="usage-card-label">Example Monthly</div><div class="usage-card-val">6,495</div><div class="usage-card-sub">500 containers x 3/week x 4.33 weeks</div></div>
+    </div>
+    <p>Upon reaching your monthly limit, you can upgrade to a higher plan or wait until renewal. Check your current usage anytime via <a href="#endpoint-10">Endpoint 10: API Key Stats</a>.</p>
+
+
+
+    <h2 id="errors">Common Errors</h2>
+    <p>If you are experiencing issues with your API requests, check the following common causes before reaching out to support.</p>
+    <div class="error-cards">
+      <div class="error-card">
+        <div class="error-card-icon">&#x23;</div>
+        <div class="error-card-body">
+          <div class="error-card-title">Incorrect Container Number</div>
+          <div class="error-card-desc">Make sure the container number includes the four-letter prefix (e.g. <code>ABCD1234567</code>).</div>
+        </div>
+      </div>
+      <div class="error-card">
+        <div class="error-card-icon">&#x2248;</div>
+        <div class="error-card-body">
+          <div class="error-card-title">Incorrect Shipping Line Name</div>
+          <div class="error-card-desc">If tracking a third-party prefix, the shipping line must match the API parameter exactly.</div>
+        </div>
+      </div>
+      <div class="error-card">
+        <div class="error-card-icon">&#x2715;</div>
+        <div class="error-card-body">
+          <div class="error-card-title">Missing, Invalid or Expired API Key</div>
+          <div class="error-card-desc">Verify your API key is included in the <code>x-api-key</code> header and is still active. A request without the header returns <code>401</code>; a key that does not exist returns <code>403</code>.</div>
+        </div>
+      </div>
+      <div class="error-card">
+        <div class="error-card-icon">&#x21AF;</div>
+        <div class="error-card-body">
+          <div class="error-card-title">Rate Limit Exceeded</div>
+          <div class="error-card-desc">A <code>429</code> means the key exceeded its per-minute or monthly quota (<code>type=MINUTE</code> or <code>type=MONTHLY</code> in the title). Retry after the limit window passes, and check usage via the <a href="#endpoint-10">API Key Stats endpoint</a>.</div>
+        </div>
+      </div>
+      <div class="error-card">
+        <div class="error-card-icon">&#x29B8;</div>
+        <div class="error-card-body">
+          <div class="error-card-title">Expired Subscription</div>
+          <div class="error-card-desc">Ensure your subscription is active and your payment method is up to date.</div>
+        </div>
+      </div>
+      <div class="error-card">
+        <div class="error-card-icon">&#x21BB;</div>
+        <div class="error-card-body">
+          <div class="error-card-title">Tracking Data Temporarily Unavailable</div>
+          <div class="error-card-desc">A <code>502</code> means tracking data for this container or Bill of Lading can't be returned right now. Retry later if the response says <code>"retryable": true</code>.</div>
+        </div>
+      </div>
+    </div>
+    <h3>Error Format</h3>
+    <p>Container and Bill of Lading errors carry three fields: <code>code</code>, a stable machine-readable value to build your logic on; <code>title</code>, a human-readable message; and <code>retryable</code>, which is <code>true</code> if the same request may succeed later and <code>false</code> if it will fail the same way until the input changes. Apart from <code>invalid_request</code>, each code always returns the same <code>title</code>, so match on <code>code</code>, not on the text.</p>
+    <div class="code-block"><div class="code-header"><span class="code-lang">JSON</span><button class="copy-btn" onclick="copyBlock(this)">&#x29C9;</button></div>
+<pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"code"</span>: <span class="hl-str">"upstream_unavailable"</span>,
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Tracking data is temporarily unavailable. Please try again later."</span>,
+    <span class="hl-key">"retryable"</span>: <span class="hl-null">true</span>
+  }
+}</pre>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>code</th><th>HTTP</th><th>Retryable</th><th>Meaning</th></tr></thead><tbody><tr><td class="td-name">invalid_request</td><td>400</td><td>No</td><td>The request is malformed: a missing or invalid parameter, or an unsupported shipping line. <code>title</code> explains what to fix.</td></tr><tr><td class="td-name">unknown_resource</td><td>404</td><td>No</td><td>No tracking data was found for this number and shipping line.</td></tr><tr><td class="td-name">internal_error</td><td>500</td><td>Yes</td><td>An unexpected error on our side.</td></tr><tr><td class="td-name">content_unavailable</td><td>502</td><td>No</td><td>Tracking data for this request is not available.</td></tr><tr><td class="td-name">upstream_unavailable</td><td>502</td><td>Yes</td><td>Tracking data is temporarily unavailable. Retry later.</td></tr></tbody></table></div>
+    <p>API-key errors (<code>401</code>, <code>403</code>, <code>429</code>) can come from any endpoint and contain <code>title</code> only. Errors from the vessel, port and API key endpoints also contain <code>title</code> only.</p>
+    <p style="margin-top:16px">Still experiencing issues? Contact us at <a href="mailto:support@jsoncargo.com">support@jsoncargo.com</a></p>
+  </section>
+
+  <!-- ENDPOINT 1 -->
+  <section class="doc-section" id="endpoint-1">
+    <h2>Endpoint 1: Get Container Details</h2>
+    <p>Fetches details of a container using the tracking number.</p>
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <span class="method-badge">GET</span>
+        <span class="endpoint-url">https://api.jsoncargo.com/api/v1/containers/{tracking_number}/</span>
+        <button class="copy-btn" onclick="copyText('GET https://api.jsoncargo.com/api/v1/containers/{tracking_number}/', this)">&#x29C9;</button>
+      </div>
+      <div class="endpoint-body">
+        <h3>Path Parameters</h3>
+        <div class="param-list">
+          <div class="param-item"><span class="param-name">tracking_number</span><span class="param-type">string</span><span class="param-required">required</span><span class="param-desc">The full container number including the 4-letter prefix (e.g. MEDU9091004).</span></div>
+        </div>
+        <h3>Query Parameters</h3>
+        <div class="param-list">
+          <div class="param-item"><span class="param-name">shipping_line</span><span class="param-type">string</span><span class="param-required">required</span><span class="param-desc">Shipping line for this tracking request, for example <code>ONE</code>, <code>MAERSK</code>, <code>MSC</code>, <code>COSCO</code>, <code>YANG_MING</code>. See the <a href="#shipping-lines">Shipping Lines table</a>.</span></div>
+        </div>
+        <h3>Responses</h3>
+        <div class="responses">
+          <div class="response-item"><div class="response-trigger response-200" onclick="toggleResponse(this)"><span>200 Container details retrieved successfully</span><span class="response-icon">+</span></div><div class="response-content"><div class="table-wrap">
+                <table>
+                  <thead><tr><th>Field</th><th>Type</th></tr></thead>
+                  <tbody>
+                    <tr><td class="td-name">container_id</td><td>string</td></tr>
+                    <tr><td class="td-name">container_type</td><td>string</td></tr>
+                    <tr><td class="td-name">container_status</td><td>string</td></tr>
+                    <tr><td class="td-name">shipping_line_name</td><td>string</td></tr>
+                    
+                    <tr><td class="td-name">tare</td><td>string</td></tr>
+                    <tr><td class="td-name">shipped_from</td><td>string</td></tr>
+                    <tr><td class="td-name">shipped_from_terminal</td><td>string</td></tr>
+                    <tr><td class="td-name">shipped_to</td><td>string</td></tr>
+                    <tr><td class="td-name">shipped_to_terminal</td><td>string</td></tr>
+                    <tr><td class="td-name">atd_origin</td><td>datetime</td></tr>
+                    <tr><td class="td-name">eta_final_destination</td><td>datetime</td></tr>
+                    <tr><td class="td-name">last_location</td><td>string</td></tr>
+                    <tr><td class="td-name">last_location_terminal</td><td>string</td></tr>
+                    <tr><td class="td-name">next_location</td><td>string</td></tr>
+                    <tr><td class="td-name">next_location_terminal</td><td>string</td></tr>
+                    <tr><td class="td-name">atd_last_location</td><td>datetime</td></tr>
+                    <tr><td class="td-name">eta_next_destination</td><td>datetime</td></tr>
+                    <tr><td class="td-name">timestamp_of_last_location</td><td>datetime</td></tr>
+                    <tr><td class="td-name">last_movement_timestamp</td><td>datetime</td></tr>
+                    <tr><td class="td-name">loading_port</td><td>string</td></tr>
+                    <tr><td class="td-name">discharging_port</td><td>string</td></tr>
+                    <tr><td class="td-name">last_vessel_name</td><td>string</td></tr>
+                    <tr><td class="td-name">last_voyage_number</td><td>string</td></tr>
+                    <tr><td class="td-name">current_vessel_name</td><td>string</td></tr>
+                    <tr><td class="td-name">current_voyage_number</td><td>string</td></tr>
+                    <tr><td class="td-name">last_updated</td><td>datetime</td></tr>
+                  </tbody>
+                </table>
+              </div></div></div>
+          <div class="response-item"><div class="response-trigger response-400" onclick="toggleResponse(this)"><span>400 Invalid request</span><span class="response-icon">+</span></div><div class="response-content"><p class="resp-note"><code>invalid_request</code>, not retryable. The only error whose <code>title</code> varies: it tells you what to fix. Values in <code>{braces}</code> are filled in from your request.</p><div class="table-wrap"><table><thead><tr><th>When</th><th>title</th></tr></thead><tbody><tr><td>Tracking number is not 11 characters</td><td class="td-msg">Invalid tracking number <span class="msg-ph">{tracking_number}</span>.</td></tr><tr><td>shipping_line missing</td><td class="td-msg">Missing required parameter shipping_line. Please provide shipping_line to select the carrier for tracking number <span class="msg-ph">{tracking_number}</span>.</td></tr><tr><td>Unknown shipping line</td><td class="td-msg">Shipping line <span class="msg-ph">{shipping_line}</span> for tracking number <span class="msg-ph">{tracking_number}</span> is not recognized. Supported shipping_line values are: <span class="msg-ph">{list}</span>.</td></tr><tr><td>Shipping line not enabled</td><td class="td-msg">Shipping line <span class="msg-ph">{shipping_line}</span> for tracking number <span class="msg-ph">{tracking_number}</span> is not supported. Supported shipping_line values are: <span class="msg-ph">{list}</span>.</td></tr><tr><td>Any other invalid input</td><td class="td-msg">The request is invalid.</td></tr></tbody></table></div><div class="resp-ex-label">Example</div><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"code"</span>: <span class="hl-str">"invalid_request"</span>,
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Shipping line NOT_A_CARRIER for tracking number ABCD1234567 is not recognized. Supported shipping_line values are: MSC, ONE, COSCO, YANG_MING, EVERGREEN, CMA_CGM, MAERSK, HAPAG_LLOYD, HMM, ZIM, PIL."</span>,
+    <span class="hl-key">"retryable"</span>: <span class="hl-null">false</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-401" onclick="toggleResponse(this)"><span>401 Missing API key</span><span class="response-icon">+</span></div><div class="response-content"><p class="resp-note">Returned by the API-key check, so the body has <code>title</code> only.</p><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"API key header is missing."</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-403" onclick="toggleResponse(this)"><span>403 Invalid API key</span><span class="response-icon">+</span></div><div class="response-content"><p class="resp-note">Returned by the API-key check, so the body has <code>title</code> only. <code>{api_key}</code> is the key you sent.</p><div class="resp-ex-label">API key not found</div><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"API key {api_key} does not exist."</span>
+  }
+}</pre><div class="resp-ex-label">Key lacks admin permission</div><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"API key {api_key} does not have admin permissions."</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-404" onclick="toggleResponse(this)"><span>404 Not found</span><span class="response-icon">+</span></div><div class="response-content"><p class="resp-note"><code>unknown_resource</code>, not retryable: no tracking data was found for this container number and shipping line.</p><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"code"</span>: <span class="hl-str">"unknown_resource"</span>,
+    <span class="hl-key">"title"</span>: <span class="hl-str">"The requested resource was not found."</span>,
+    <span class="hl-key">"retryable"</span>: <span class="hl-null">false</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-429" onclick="toggleResponse(this)"><span>429 Rate limit exceeded</span><span class="response-icon">+</span></div><div class="response-content"><p class="resp-note">The API key exceeded its per-minute or monthly quota. Returned by the API-key check, so the body has <code>title</code> only. Retry after the limit window passes.</p><div class="resp-ex-label">Per-minute limit</div><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"API key exceeded its rate limit (type=MINUTE)."</span>
+  }
+}</pre><div class="resp-ex-label">Monthly limit</div><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"API key exceeded its rate limit (type=MONTHLY)."</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-500" onclick="toggleResponse(this)"><span>500 Internal server error</span><span class="response-icon">+</span></div><div class="response-content"><p class="resp-note"><code>internal_error</code>, retryable: an unexpected error on our side.</p><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"code"</span>: <span class="hl-str">"internal_error"</span>,
+    <span class="hl-key">"title"</span>: <span class="hl-str">"An unexpected error occurred."</span>,
+    <span class="hl-key">"retryable"</span>: <span class="hl-null">true</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-502" onclick="toggleResponse(this)"><span>502 Tracking data unavailable</span><span class="response-icon">+</span></div><div class="response-content"><p class="resp-note"><code>upstream_unavailable</code> (retryable) or <code>content_unavailable</code> (not retryable): tracking data for this request is temporarily unavailable, or is not available for this shipment.</p><div class="resp-ex-label">Temporarily unavailable (retryable)</div><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"code"</span>: <span class="hl-str">"upstream_unavailable"</span>,
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Tracking data is temporarily unavailable. Please try again later."</span>,
+    <span class="hl-key">"retryable"</span>: <span class="hl-null">true</span>
+  }
+}</pre><div class="resp-ex-label">Data not available (not retryable)</div><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"code"</span>: <span class="hl-str">"content_unavailable"</span>,
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Data for this request is currently unavailable."</span>,
+    <span class="hl-key">"retryable"</span>: <span class="hl-null">false</span>
+  }
+}</pre></div></div>
+        </div>
+        <h3>Response Sample</h3>
+        <div class="code-block"><div class="code-header"><span class="code-lang">JSON</span><button class="copy-btn" onclick="copyBlock(this)">&#x29C9;</button></div>
+<pre>{
+  <span class="hl-key">"data"</span>: {
+    <span class="hl-key">"container_id"</span>: <span class="hl-str">"MEDU9091004"</span>,
+    <span class="hl-key">"container_type"</span>: <span class="hl-str">"40' HIGH CUBE REEFER"</span>,
+    <span class="hl-key">"container_status"</span>: <span class="hl-str">"Empty received at CY"</span>,
+    <span class="hl-key">"shipping_line_name"</span>: <span class="hl-str">"Mediterranean Shipping Company"</span>,
+    <span class="hl-key">"tare"</span>: <span class="hl-null">null</span>,
+    <span class="hl-key">"shipped_from"</span>: <span class="hl-str">"GUAYAQUIL, EC"</span>,
+    <span class="hl-key">"shipped_from_terminal"</span>: <span class="hl-str">"NAPORTEC TERMINAL - BANANAPUERTO "</span>,
+    <span class="hl-key">"shipped_to"</span>: <span class="hl-str">"TRIPOLI, LY"</span>,
+    <span class="hl-key">"shipped_to_terminal"</span>: <span class="hl-str">"SPCO ( SOCIALIST PORTS CO UNDER MINISTRY OF TRANSPORT ) "</span>,
+    <span class="hl-key">"atd_origin"</span>: <span class="hl-str">"2024-07-09 00:00"</span>,
+    <span class="hl-key">"eta_final_destination"</span>: <span class="hl-null">null</span>,
+    <span class="hl-key">"last_location"</span>: <span class="hl-str">"TRIPOLI, LY"</span>,
+    <span class="hl-key">"last_location_terminal"</span>: <span class="hl-str">"SPCO ( SOCIALIST PORTS CO UNDER MINISTRY OF TRANSPORT ) "</span>,
+    <span class="hl-key">"next_location"</span>: <span class="hl-null">null</span>,
+    <span class="hl-key">"next_location_terminal"</span>: <span class="hl-null">null</span>,
+    <span class="hl-key">"atd_last_location"</span>: <span class="hl-str">"2024-08-11 00:00"</span>,
+    <span class="hl-key">"eta_next_destination"</span>: <span class="hl-null">null</span>,
+    <span class="hl-key">"timestamp_of_last_location"</span>: <span class="hl-str">"2024-08-13 00:00"</span>,
+    <span class="hl-key">"last_movement_timestamp"</span>: <span class="hl-str">"2024-08-17 00:00"</span>,
+    <span class="hl-key">"loading_port"</span>: <span class="hl-str">"GUAYAQUIL, EC"</span>,
+    <span class="hl-key">"discharging_port"</span>: <span class="hl-str">"TRIPOLI, LY"</span>,
+    <span class="hl-key">"last_vessel_name"</span>: <span class="hl-str">"MSC LENA F"</span>,
+    <span class="hl-key">"last_voyage_number"</span>: <span class="hl-str">"YF432A"</span>,
+    <span class="hl-key">"current_vessel_name"</span>: <span class="hl-null">null</span>,
+    <span class="hl-key">"current_voyage_number"</span>: <span class="hl-null">null</span>,
+    <span class="hl-key">"last_updated"</span>: <span class="hl-str">"2024-09-09 18:34"</span>
+  }
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENDPOINT 2 -->
+  <section class="doc-section" id="endpoint-2">
+    <h2>Endpoint 2: Get Bill of Lading Containers</h2>
+    <p>Fetches the container numbers associated with a Bill of Lading (B/L) number.</p>
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <span class="method-badge">GET</span>
+        <span class="endpoint-url">https://api.jsoncargo.com/api/v1/containers/bol/{bol_number}/</span>
+        <button class="copy-btn" onclick="copyText('GET https://api.jsoncargo.com/api/v1/containers/bol/{bol_number}/', this)">&#x29C9;</button>
+      </div>
+      <div class="endpoint-body">
+        <h3>Path Parameters</h3>
+        <div class="param-list">
+          <div class="param-item"><span class="param-name">bol_number</span><span class="param-type">string</span><span class="param-required">required</span><span class="param-desc">Bill of Lading number. Alphanumeric characters only.</span></div>
+        </div>
+        <h3>Query Parameters</h3>
+        <div class="param-list">
+          <div class="param-item"><span class="param-name">shipping_line</span><span class="param-type">string</span><span class="param-required">required</span><span class="param-desc">Shipping line for this request, for example <code>MAERSK</code>, <code>COSCO</code>, <code>CMA_CGM</code>, <code>YANG_MING</code>. See the <a href="#shipping-lines">Shipping Lines table</a>.</span></div>
+        </div>
+        <h3>Responses</h3>
+        <div class="responses">
+          <div class="response-item"><div class="response-trigger response-200" onclick="toggleResponse(this)"><span>200 Bill of Lading containers retrieved successfully</span><span class="response-icon">+</span></div>
+            <div class="response-content">
+              <div class="table-wrap"><table><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+                <tr><td class="td-name">bill_of_lading</td><td>string</td></tr>
+                <tr><td class="td-name">shipping_line_name</td><td>string</td></tr>
+                
+                <tr><td class="td-name">associated_containers</td><td>integer</td></tr>
+                <tr><td class="td-name">associated_container_numbers</td><td>array of strings</td></tr>
+                <tr><td class="td-name">last_updated</td><td>string</td></tr>
+              </tbody></table></div>
+            </div>
+          </div>
+          <div class="response-item"><div class="response-trigger response-400" onclick="toggleResponse(this)"><span>400 Invalid request</span><span class="response-icon">+</span></div><div class="response-content"><p class="resp-note"><code>invalid_request</code>, not retryable. The only error whose <code>title</code> varies: it tells you what to fix. Values in <code>{braces}</code> are filled in from your request.</p><div class="table-wrap"><table><thead><tr><th>When</th><th>title</th></tr></thead><tbody><tr><td>B/L number has non-alphanumeric characters</td><td class="td-msg">Bill of Lading <span class="msg-ph">{bol_number}</span> is invalid. Must contain only alphanumeric characters.</td></tr><tr><td>shipping_line missing</td><td class="td-msg">Missing required parameter shipping_line. Please provide shipping_line to select the carrier for Bill of Lading <span class="msg-ph">{bol_number}</span>.</td></tr><tr><td>Unknown shipping line</td><td class="td-msg">Shipping line <span class="msg-ph">{shipping_line}</span> for Bill of Lading <span class="msg-ph">{bol_number}</span> is not recognized. Supported shipping_line values are: <span class="msg-ph">{list}</span>.</td></tr><tr><td>Shipping line not enabled</td><td class="td-msg">Shipping line <span class="msg-ph">{shipping_line}</span> for Bill of Lading <span class="msg-ph">{bol_number}</span> is not supported. Supported shipping_line values are: <span class="msg-ph">{list}</span>.</td></tr><tr><td>Any other invalid input</td><td class="td-msg">The request is invalid.</td></tr></tbody></table></div><div class="resp-ex-label">Example</div><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"code"</span>: <span class="hl-str">"invalid_request"</span>,
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Missing required parameter shipping_line. Please provide shipping_line to select the carrier for Bill of Lading 6464150910."</span>,
+    <span class="hl-key">"retryable"</span>: <span class="hl-null">false</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-401" onclick="toggleResponse(this)"><span>401 Missing API key</span><span class="response-icon">+</span></div><div class="response-content"><p class="resp-note">Returned by the API-key check, so the body has <code>title</code> only.</p><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"API key header is missing."</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-403" onclick="toggleResponse(this)"><span>403 Invalid API key</span><span class="response-icon">+</span></div><div class="response-content"><p class="resp-note">Returned by the API-key check, so the body has <code>title</code> only. <code>{api_key}</code> is the key you sent.</p><div class="resp-ex-label">API key not found</div><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"API key {api_key} does not exist."</span>
+  }
+}</pre><div class="resp-ex-label">Key lacks admin permission</div><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"API key {api_key} does not have admin permissions."</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-404" onclick="toggleResponse(this)"><span>404 Not found</span><span class="response-icon">+</span></div><div class="response-content"><p class="resp-note"><code>unknown_resource</code>, not retryable: no data was found for this Bill of Lading number and shipping line.</p><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"code"</span>: <span class="hl-str">"unknown_resource"</span>,
+    <span class="hl-key">"title"</span>: <span class="hl-str">"The requested resource was not found."</span>,
+    <span class="hl-key">"retryable"</span>: <span class="hl-null">false</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-429" onclick="toggleResponse(this)"><span>429 Rate limit exceeded</span><span class="response-icon">+</span></div><div class="response-content"><p class="resp-note">The API key exceeded its per-minute or monthly quota. Returned by the API-key check, so the body has <code>title</code> only. Retry after the limit window passes.</p><div class="resp-ex-label">Per-minute limit</div><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"API key exceeded its rate limit (type=MINUTE)."</span>
+  }
+}</pre><div class="resp-ex-label">Monthly limit</div><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"API key exceeded its rate limit (type=MONTHLY)."</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-500" onclick="toggleResponse(this)"><span>500 Internal server error</span><span class="response-icon">+</span></div><div class="response-content"><p class="resp-note"><code>internal_error</code>, retryable: an unexpected error on our side.</p><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"code"</span>: <span class="hl-str">"internal_error"</span>,
+    <span class="hl-key">"title"</span>: <span class="hl-str">"An unexpected error occurred."</span>,
+    <span class="hl-key">"retryable"</span>: <span class="hl-null">true</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-502" onclick="toggleResponse(this)"><span>502 Tracking data unavailable</span><span class="response-icon">+</span></div><div class="response-content"><p class="resp-note"><code>upstream_unavailable</code> (retryable) or <code>content_unavailable</code> (not retryable): tracking data for this request is temporarily unavailable, or is not available for this shipment.</p><div class="resp-ex-label">Temporarily unavailable (retryable)</div><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"code"</span>: <span class="hl-str">"upstream_unavailable"</span>,
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Tracking data is temporarily unavailable. Please try again later."</span>,
+    <span class="hl-key">"retryable"</span>: <span class="hl-null">true</span>
+  }
+}</pre><div class="resp-ex-label">Data not available (not retryable)</div><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"code"</span>: <span class="hl-str">"content_unavailable"</span>,
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Data for this request is currently unavailable."</span>,
+    <span class="hl-key">"retryable"</span>: <span class="hl-null">false</span>
+  }
+}</pre></div></div>
+        </div>
+        <h3>Response Sample</h3>
+        <div class="code-block"><div class="code-header"><span class="code-lang">JSON</span><button class="copy-btn" onclick="copyBlock(this)">&#x29C9;</button></div>
+<pre>{
+  <span class="hl-key">"data"</span>: {
+    <span class="hl-key">"bill_of_lading"</span>: <span class="hl-str">"6464150910"</span>,
+    <span class="hl-key">"shipping_line_name"</span>: <span class="hl-str">"COSCO SHIPPING Lines Co"</span>,
+    <span class="hl-key">"associated_containers"</span>: <span class="hl-num">1</span>,
+    <span class="hl-key">"associated_container_numbers"</span>: [
+      <span class="hl-str">"OOLU9372428"</span>
+    ],
+    <span class="hl-key">"last_updated"</span>: <span class="hl-str">"2026-09-28 09:30"</span>
+  }
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENDPOINT 3 -->
+  <section class="doc-section" id="endpoint-3">
+    <h2>Endpoint 3: Get Basic Live Vessel Tracking Details</h2>
+    <p>Fetches basic live position and status for a vessel using UUID, MMSI, or IMO as the identifier.</p>
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <span class="method-badge">GET</span>
+        <span class="endpoint-url">https://api.jsoncargo.com/api/v1/vessel/basic</span>
+        <button class="copy-btn" onclick="copyText('GET https://api.jsoncargo.com/api/v1/vessel/basic', this)">&#x29C9;</button>
+      </div>
+      <div class="endpoint-body">
+        <h3>Query Parameters</h3>
+        <div class="param-list">
+          <div class="param-item"><span class="param-name">uuid</span><span class="param-type">string</span><span class="param-optional">one required</span></div>
+          <div class="param-item"><span class="param-name">mmsi</span><span class="param-type">string</span><span class="param-optional">one required</span></div>
+          <div class="param-item"><span class="param-name">imo</span><span class="param-type">string</span><span class="param-optional">one required</span></div>
+        </div>
+        <h3>Responses</h3>
+        <div class="responses">
+          <div class="response-item"><div class="response-trigger response-200" onclick="toggleResponse(this)"><span>200 Basic vessel details retrieved successfully</span><span class="response-icon">+</span></div>
+            <div class="response-content">
+              <div class="table-wrap"><table><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+                <tr><td class="td-name">uuid</td><td>string</td></tr><tr><td class="td-name">name</td><td>string</td></tr>
+                <tr><td class="td-name">mmsi</td><td>string</td></tr><tr><td class="td-name">imo</td><td>string</td></tr>
+                <tr><td class="td-name">eni</td><td>string</td></tr><tr><td class="td-name">country_iso</td><td>string</td></tr>
+                <tr><td class="td-name">type</td><td>string</td></tr><tr><td class="td-name">type_specific</td><td>string</td></tr>
+                <tr><td class="td-name">lat</td><td>number</td></tr><tr><td class="td-name">lon</td><td>number</td></tr>
+                <tr><td class="td-name">speed</td><td>number</td></tr><tr><td class="td-name">course</td><td>number</td></tr>
+                <tr><td class="td-name">heading</td><td>number</td></tr><tr><td class="td-name">navigation_status</td><td>string</td></tr>
+                <tr><td class="td-name">destination</td><td>string</td></tr>
+                <tr><td class="td-name">last_position_epoch</td><td>integer</td></tr><tr><td class="td-name">last_position_UTC</td><td>string</td></tr>
+                <tr><td class="td-name">eta_epoch</td><td>integer</td></tr><tr><td class="td-name">eta_UTC</td><td>string</td></tr>
+              </tbody></table></div>
+            </div>
+          </div>
+          <div class="response-item"><div class="response-trigger response-400" onclick="toggleResponse(this)"><span>400 Invalid request</span><span class="response-icon">+</span></div><div class="response-content"><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Invalid request"</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-404" onclick="toggleResponse(this)"><span>404 Vessel not found</span><span class="response-icon">+</span></div><div class="response-content"><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Vessel not found"</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-429" onclick="toggleResponse(this)"><span>429 Too many requests</span><span class="response-icon">+</span></div><div class="response-content"><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Too many requests"</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-500" onclick="toggleResponse(this)"><span>500 Internal server error</span><span class="response-icon">+</span></div><div class="response-content"><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Internal server error"</span>
+  }
+}</pre></div></div>
+        </div>
+        <h3>Response Sample</h3>
+        <div class="code-block"><div class="code-header"><span class="code-lang">JSON</span><button class="copy-btn" onclick="copyBlock(this)">&#x29C9;</button></div>
+<pre>{
+  <span class="hl-key">"data"</span>: {
+    <span class="hl-key">"uuid"</span>: <span class="hl-str">"b8625b67-7142-cfd1-7b85-595cebfe4191"</span>,
+    <span class="hl-key">"name"</span>: <span class="hl-str">"MAERSK CHENNAI"</span>,
+    <span class="hl-key">"mmsi"</span>: <span class="hl-str">"566093000"</span>,
+    <span class="hl-key">"imo"</span>: <span class="hl-str">"9525338"</span>,
+    <span class="hl-key">"eni"</span>: <span class="hl-null">null</span>,
+    <span class="hl-key">"country_iso"</span>: <span class="hl-str">"SG"</span>,
+    <span class="hl-key">"type"</span>: <span class="hl-str">"Cargo - Hazard A (Major)"</span>,
+    <span class="hl-key">"type_specific"</span>: <span class="hl-str">"Container Ship"</span>,
+    <span class="hl-key">"lat"</span>: <span class="hl-num">5.51935</span>,
+    <span class="hl-key">"lon"</span>: <span class="hl-num">0.02906167</span>,
+    <span class="hl-key">"speed"</span>: <span class="hl-num">0.1</span>,
+    <span class="hl-key">"course"</span>: <span class="hl-num">256</span>,
+    <span class="hl-key">"heading"</span>: <span class="hl-num">144</span>,
+    <span class="hl-key">"navigation_status"</span>: <span class="hl-null">null</span>,
+    <span class="hl-key">"destination"</span>: <span class="hl-str">"CGPNR&gt;GHTEM"</span>,
+    <span class="hl-key">"last_position_epoch"</span>: <span class="hl-num">1721842560</span>,
+    <span class="hl-key">"last_position_UTC"</span>: <span class="hl-str">"2024-07-24T17:36:00Z"</span>,
+    <span class="hl-key">"eta_epoch"</span>: <span class="hl-num">1721633940</span>,
+    <span class="hl-key">"eta_UTC"</span>: <span class="hl-str">"2024-07-22T07:39:00Z"</span>
+  }
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENDPOINT 4 -->
+  <section class="doc-section" id="endpoint-4">
+    <h2>Endpoint 4: Get Pro Live Vessel Tracking Details</h2>
+    <p>Fetches pro details of a vessel using UUID, MMSI, or IMO: departure/arrival port details, draught, timezone, and more. All Basic fields plus the additional ones below.</p>
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <span class="method-badge">GET</span>
+        <span class="endpoint-url">https://api.jsoncargo.com/api/v1/vessel/pro</span>
+        <button class="copy-btn" onclick="copyText('GET https://api.jsoncargo.com/api/v1/vessel/pro', this)">&#x29C9;</button>
+      </div>
+      <div class="endpoint-body">
+        <p>Accepts the same query parameters as <a href="#endpoint-3">Endpoint 3</a> (<code>uuid</code>, <code>mmsi</code> or <code>imo</code>). Returns all Basic fields plus:</p>
+        <div class="table-wrap"><table><thead><tr><th>Additional Field</th><th>Type</th></tr></thead><tbody>
+          <tr><td class="td-name">current_draught</td><td>number</td></tr>
+          <tr><td class="td-name">dest_port_uuid</td><td>string</td></tr>
+          <tr><td class="td-name">dest_port</td><td>string</td></tr>
+          <tr><td class="td-name">dest_port_unlocode</td><td>string</td></tr>
+          <tr><td class="td-name">dep_port_uuid</td><td>string</td></tr>
+          <tr><td class="td-name">dep_port</td><td>string</td></tr>
+          <tr><td class="td-name">dep_port_unlocode</td><td>string</td></tr>
+          <tr><td class="td-name">atd_epoch</td><td>integer</td></tr>
+          <tr><td class="td-name">atd_UTC</td><td>string</td></tr>
+          <tr><td class="td-name">timezone_offset_sec</td><td>integer</td></tr>
+          <tr><td class="td-name">timezone</td><td>string</td></tr>
+        </tbody></table></div>
+        <h3>Responses</h3>
+        <div class="responses">
+          <div class="response-item"><div class="response-trigger response-400" onclick="toggleResponse(this)"><span>400 Invalid request</span><span class="response-icon">+</span></div><div class="response-content"><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Invalid request"</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-404" onclick="toggleResponse(this)"><span>404 Vessel not found</span><span class="response-icon">+</span></div><div class="response-content"><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Vessel not found"</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-429" onclick="toggleResponse(this)"><span>429 Too many requests</span><span class="response-icon">+</span></div><div class="response-content"><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Too many requests"</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-500" onclick="toggleResponse(this)"><span>500 Internal server error</span><span class="response-icon">+</span></div><div class="response-content"><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Internal server error"</span>
+  }
+}</pre></div></div>
+        </div>
+        <h3>Response Sample</h3>
+        <div class="code-block"><div class="code-header"><span class="code-lang">JSON</span><button class="copy-btn" onclick="copyBlock(this)">&#x29C9;</button></div>
+<pre>{
+  <span class="hl-key">"data"</span>: {
+    <span class="hl-key">"uuid"</span>: <span class="hl-str">"b8625b67-7142-cfd1-7b85-595cebfe4191"</span>,
+    <span class="hl-key">"name"</span>: <span class="hl-str">"MAERSK CHENNAI"</span>,
+    <span class="hl-key">"mmsi"</span>: <span class="hl-str">"566093000"</span>,
+    <span class="hl-key">"imo"</span>: <span class="hl-str">"9525338"</span>,
+    <span class="hl-key">"eni"</span>: <span class="hl-null">null</span>,
+    <span class="hl-key">"country_iso"</span>: <span class="hl-str">"SG"</span>,
+    <span class="hl-key">"type"</span>: <span class="hl-str">"Cargo - Hazard A (Major)"</span>,
+    <span class="hl-key">"type_specific"</span>: <span class="hl-str">"Container Ship"</span>,
+    <span class="hl-key">"lat"</span>: <span class="hl-num">5.519612</span>,
+    <span class="hl-key">"lon"</span>: <span class="hl-num">0.02949333</span>,
+    <span class="hl-key">"speed"</span>: <span class="hl-num">0.1</span>,
+    <span class="hl-key">"course"</span>: <span class="hl-num">133</span>,
+    <span class="hl-key">"heading"</span>: <span class="hl-num">161</span>,
+    <span class="hl-key">"current_draught"</span>: <span class="hl-num">12.9</span>,
+    <span class="hl-key">"navigation_status"</span>: <span class="hl-null">null</span>,
+    <span class="hl-key">"destination"</span>: <span class="hl-str">"CGPNR&gt;GHTEM"</span>,
+    <span class="hl-key">"dest_port_uuid"</span>: <span class="hl-str">"4e16eec7-c821-423f-7a61-31ca9cdd4601"</span>,
+    <span class="hl-key">"dest_port"</span>: <span class="hl-str">"TEMA"</span>,
+    <span class="hl-key">"dest_port_unlocode"</span>: <span class="hl-str">"GHTEM"</span>,
+    <span class="hl-key">"dep_port_uuid"</span>: <span class="hl-str">"11ccc7a1-cb91-bfd8-fefd-520b892be1da"</span>,
+    <span class="hl-key">"dep_port"</span>: <span class="hl-str">"POINTE NOIRE"</span>,
+    <span class="hl-key">"dep_port_unlocode"</span>: <span class="hl-str">"CGPNR"</span>,
+    <span class="hl-key">"last_position_epoch"</span>: <span class="hl-num">1721925300</span>,
+    <span class="hl-key">"last_position_UTC"</span>: <span class="hl-str">"2024-07-25T16:35:00Z"</span>,
+    <span class="hl-key">"atd_epoch"</span>: <span class="hl-num">1721391180</span>,
+    <span class="hl-key">"atd_UTC"</span>: <span class="hl-str">"2024-07-19T12:13:00Z"</span>,
+    <span class="hl-key">"eta_epoch"</span>: <span class="hl-num">1721633940</span>,
+    <span class="hl-key">"eta_UTC"</span>: <span class="hl-str">"2024-07-22T07:39:00Z"</span>,
+    <span class="hl-key">"timezone_offset_sec"</span>: <span class="hl-num">0</span>,
+    <span class="hl-key">"timezone"</span>: <span class="hl-str">"GMT"</span>
+  }
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENDPOINT 5 -->
+  <section class="doc-section" id="endpoint-5">
+    <h2>Endpoint 5: Get Bulk Live Vessel Tracking Details</h2>
+    <p>Fetches details of up to 100 vessels in a single request using their identifiers (UUID, MMSI, or IMO).</p>
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <span class="method-badge">GET</span>
+        <span class="endpoint-url">https://api.jsoncargo.com/api/v1/vessel/bulk</span>
+        <button class="copy-btn" onclick="copyText('GET https://api.jsoncargo.com/api/v1/vessel/bulk', this)">&#x29C9;</button>
+      </div>
+      <div class="endpoint-body">
+        <h3>Query Parameters</h3>
+        <p>Repeat the parameter once per vessel, for example <code>?imo=9525338&amp;imo=9249403</code> (up to 100 vessels). Returns <code>data</code> as an array of vessel objects with the same fields as <a href="#endpoint-3">Endpoint 3</a>.</p>
+        <div class="param-list">
+          <div class="param-item"><span class="param-name">uuid</span><span class="param-type">array of strings</span><span class="param-optional">one required</span></div>
+          <div class="param-item"><span class="param-name">mmsi</span><span class="param-type">array of strings</span><span class="param-optional">one required</span></div>
+          <div class="param-item"><span class="param-name">imo</span><span class="param-type">array of strings</span><span class="param-optional">one required</span></div>
+        </div>
+        
+        <h3>Responses</h3>
+        <div class="responses">
+          <div class="response-item"><div class="response-trigger response-400" onclick="toggleResponse(this)"><span>400 Invalid request</span><span class="response-icon">+</span></div><div class="response-content"><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Invalid request"</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-404" onclick="toggleResponse(this)"><span>404 Vessel not found</span><span class="response-icon">+</span></div><div class="response-content"><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Vessel not found"</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-429" onclick="toggleResponse(this)"><span>429 Too many requests</span><span class="response-icon">+</span></div><div class="response-content"><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Too many requests"</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-500" onclick="toggleResponse(this)"><span>500 Internal server error</span><span class="response-icon">+</span></div><div class="response-content"><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Internal server error"</span>
+  }
+}</pre></div></div>
+        </div>
+        <h3>Response Sample</h3>
+        <div class="code-block"><div class="code-header"><span class="code-lang">JSON</span><button class="copy-btn" onclick="copyBlock(this)">&#x29C9;</button></div>
+<pre>{
+  <span class="hl-key">"data"</span>: [
+    {
+      <span class="hl-key">"uuid"</span>: <span class="hl-str">"b8625b67-7142-cfd1-7b85-595cebfe4191"</span>,
+      <span class="hl-key">"name"</span>: <span class="hl-str">"MAERSK CHENNAI"</span>,
+      <span class="hl-key">"mmsi"</span>: <span class="hl-str">"566093000"</span>,
+      <span class="hl-key">"imo"</span>: <span class="hl-str">"9525338"</span>,
+      <span class="hl-key">"eni"</span>: <span class="hl-null">null</span>,
+      <span class="hl-key">"country_iso"</span>: <span class="hl-str">"SG"</span>,
+      <span class="hl-key">"type"</span>: <span class="hl-str">"Cargo - Hazard A (Major)"</span>,
+      <span class="hl-key">"type_specific"</span>: <span class="hl-str">"Container Ship"</span>,
+      <span class="hl-key">"lat"</span>: <span class="hl-num">5.519552</span>,
+      <span class="hl-key">"lon"</span>: <span class="hl-num">0.0297</span>,
+      <span class="hl-key">"speed"</span>: <span class="hl-num">0</span>,
+      <span class="hl-key">"course"</span>: <span class="hl-num">0</span>,
+      <span class="hl-key">"heading"</span>: <span class="hl-num">169</span>,
+      <span class="hl-key">"navigation_status"</span>: <span class="hl-null">null</span>,
+      <span class="hl-key">"destination"</span>: <span class="hl-str">"CGPNR&gt;GHT"</span>,
+      <span class="hl-key">"last_position_epoch"</span>: <span class="hl-num">1721927100</span>,
+      <span class="hl-key">"last_position_UTC"</span>: <span class="hl-str">"2024-07-25T17:05:00Z"</span>,
+      <span class="hl-key">"eta_epoch"</span>: <span class="hl-null">null</span>,
+      <span class="hl-key">"eta_UTC"</span>: <span class="hl-null">null</span>
+    },
+    {
+      <span class="hl-key">"uuid"</span>: <span class="hl-str">"17959a4c-f5a9-ed71-1a42-5bfab00670ef"</span>,
+      <span class="hl-key">"name"</span>: <span class="hl-str">"GARGANO"</span>,
+      <span class="hl-key">"mmsi"</span>: <span class="hl-str">"235362000"</span>,
+      <span class="hl-key">"imo"</span>: <span class="hl-str">"9249403"</span>,
+      <span class="hl-key">"eni"</span>: <span class="hl-null">null</span>,
+      <span class="hl-key">"country_iso"</span>: <span class="hl-str">"GB"</span>,
+      <span class="hl-key">"type"</span>: <span class="hl-str">"Other"</span>,
+      <span class="hl-key">"type_specific"</span>: <span class="hl-str">"Supply Vessel"</span>,
+      <span class="hl-key">"lat"</span>: <span class="hl-num">54.01164</span>,
+      <span class="hl-key">"lon"</span>: <span class="hl-num">6.747243</span>,
+      <span class="hl-key">"speed"</span>: <span class="hl-num">0</span>,
+      <span class="hl-key">"course"</span>: <span class="hl-num">218</span>,
+      <span class="hl-key">"heading"</span>: <span class="hl-num">269</span>,
+      <span class="hl-key">"navigation_status"</span>: <span class="hl-null">null</span>,
+      <span class="hl-key">"destination"</span>: <span class="hl-str">"RWE OWF"</span>,
+      <span class="hl-key">"last_position_epoch"</span>: <span class="hl-num">1721927100</span>,
+      <span class="hl-key">"last_position_UTC"</span>: <span class="hl-str">"2024-07-25T17:05:00Z"</span>,
+      <span class="hl-key">"eta_epoch"</span>: <span class="hl-null">null</span>,
+      <span class="hl-key">"eta_UTC"</span>: <span class="hl-null">null</span>
+    }
+  ]
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENDPOINT 6 -->
+  <section class="doc-section" id="endpoint-6">
+    <h2>Endpoint 6: Vessel Finder API</h2>
+    <p>Fetches static ship data. Search and filter vessels by name, type, flag state, tonnage, dimensions, and build year.</p>
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <span class="method-badge">GET</span>
+        <span class="endpoint-url">https://api.jsoncargo.com/api/v1/vessel/finder</span>
+        <button class="copy-btn" onclick="copyText('GET https://api.jsoncargo.com/api/v1/vessel/finder', this)">&#x29C9;</button>
+      </div>
+      <div class="endpoint-body">
+        <h3>Query Parameters</h3>
+        <div class="table-wrap"><table><thead><tr><th>Parameter</th><th>Type</th></tr></thead><tbody>
+          <tr><td class="td-name">name</td><td>string</td></tr>
+          <tr><td class="td-name">fuzzy</td><td>integer</td></tr>
+          <tr><td class="td-name">type</td><td>string</td></tr>
+          <tr><td class="td-name">type_specific</td><td>string</td></tr>
+          <tr><td class="td-name">country_iso</td><td>string</td></tr>
+          <tr><td class="td-name">gross_tonnage_min / gross_tonnage_max</td><td>integer</td></tr>
+          <tr><td class="td-name">deadweight_min / deadweight_max</td><td>integer</td></tr>
+          <tr><td class="td-name">length_min / length_max</td><td>number</td></tr>
+          <tr><td class="td-name">breadth_min / breadth_max</td><td>number</td></tr>
+          <tr><td class="td-name">year_built_min / year_built_max</td><td>integer</td></tr>
+          <tr><td class="td-name">next</td><td>string</td></tr>
+        </tbody></table></div>
+        <p>Results are paged. The response includes <code>meta.next</code>; pass it as <code>next</code> to fetch the following page. It is <code>null</code> on the last page.</p>
+        <h3>Responses</h3>
+        <div class="responses">
+          <div class="response-item"><div class="response-trigger response-400" onclick="toggleResponse(this)"><span>400 Invalid request</span><span class="response-icon">+</span></div><div class="response-content"><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Invalid request"</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-404" onclick="toggleResponse(this)"><span>404 Vessel not found</span><span class="response-icon">+</span></div><div class="response-content"><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Vessel not found"</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-429" onclick="toggleResponse(this)"><span>429 Too many requests</span><span class="response-icon">+</span></div><div class="response-content"><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Too many requests"</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-500" onclick="toggleResponse(this)"><span>500 Internal server error</span><span class="response-icon">+</span></div><div class="response-content"><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Internal server error"</span>
+  }
+}</pre></div></div>
+        </div>
+        <h3>Response Sample</h3>
+        <div class="code-block"><div class="code-header"><span class="code-lang">JSON</span><button class="copy-btn" onclick="copyBlock(this)">&#x29C9;</button></div>
+<pre>{
+  <span class="hl-key">"data"</span>: [
+    {
+      <span class="hl-key">"uuid"</span>: <span class="hl-str">"335087a4-d70f-58ba-7e51-d8c0e26f069c"</span>,
+      <span class="hl-key">"name"</span>: <span class="hl-str">"ERIC"</span>,
+      <span class="hl-key">"name_ais"</span>: <span class="hl-str">"ERIC"</span>,
+      <span class="hl-key">"mmsi"</span>: <span class="hl-str">"244700187"</span>,
+      <span class="hl-key">"imo"</span>: <span class="hl-null">null</span>,
+      <span class="hl-key">"eni"</span>: <span class="hl-str">"2000604"</span>,
+      <span class="hl-key">"country_iso"</span>: <span class="hl-str">"NL"</span>,
+      <span class="hl-key">"country_name"</span>: <span class="hl-str">"Netherlands"</span>,
+      <span class="hl-key">"callsign"</span>: <span class="hl-str">"PH5504"</span>,
+      <span class="hl-key">"type"</span>: <span class="hl-str">"Tug"</span>,
+      <span class="hl-key">"type_specific"</span>: <span class="hl-str">"Inland, Passenger Ship without Accommodation"</span>,
+      <span class="hl-key">"gross_tonnage"</span>: <span class="hl-null">null</span>,
+      <span class="hl-key">"deadweight"</span>: <span class="hl-null">null</span>,
+      <span class="hl-key">"teu"</span>: <span class="hl-null">null</span>,
+      <span class="hl-key">"liquid_gas"</span>: <span class="hl-null">null</span>,
+      <span class="hl-key">"length"</span>: <span class="hl-num">19.3</span>,
+      <span class="hl-key">"breadth"</span>: <span class="hl-num">3.2</span>,
+      <span class="hl-key">"draught_avg"</span>: <span class="hl-null">null</span>,
+      <span class="hl-key">"draught_max"</span>: <span class="hl-null">null</span>,
+      <span class="hl-key">"speed_avg"</span>: <span class="hl-num">6.7</span>,
+      <span class="hl-key">"speed_max"</span>: <span class="hl-num">9</span>,
+      <span class="hl-key">"year_built"</span>: <span class="hl-null">null</span>,
+      <span class="hl-key">"is_navaid"</span>: <span class="hl-null">false</span>,
+      <span class="hl-key">"home_port"</span>: <span class="hl-null">null</span>
+    }
+  ],
+  <span class="hl-key">"meta"</span>: {
+    <span class="hl-key">"next"</span>: <span class="hl-null">null</span>
+  }
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENDPOINT 7 -->
+  <section class="doc-section" id="endpoint-7">
+    <h2>Endpoint 7: Vessel Specs Details API</h2>
+    <p>Fetch static technical specifications for a vessel by UUID, MMSI, or IMO.</p>
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <span class="method-badge">GET</span>
+        <span class="endpoint-url">https://api.jsoncargo.com/api/v1/vessel/specs</span>
+        <button class="copy-btn" onclick="copyText('GET https://api.jsoncargo.com/api/v1/vessel/specs', this)">&#x29C9;</button>
+      </div>
+      <div class="endpoint-body">
+        <h3>Query Parameters</h3>
+        <p>Provide one of <code>uuid</code>, <code>mmsi</code> or <code>imo</code>.</p>
+        <div class="param-list">
+          <div class="param-item"><span class="param-name">uuid</span><span class="param-type">string</span><span class="param-optional">one required</span></div>
+          <div class="param-item"><span class="param-name">mmsi</span><span class="param-type">string</span><span class="param-optional">one required</span></div>
+          <div class="param-item"><span class="param-name">imo</span><span class="param-type">string</span><span class="param-optional">one required</span></div>
+        </div>
+        <h3>Responses</h3>
+        <div class="responses">
+          <div class="response-item"><div class="response-trigger response-400" onclick="toggleResponse(this)"><span>400 Invalid request</span><span class="response-icon">+</span></div><div class="response-content"><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Invalid request"</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-404" onclick="toggleResponse(this)"><span>404 Vessel not found</span><span class="response-icon">+</span></div><div class="response-content"><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Vessel not found"</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-429" onclick="toggleResponse(this)"><span>429 Too many requests</span><span class="response-icon">+</span></div><div class="response-content"><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Too many requests"</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-500" onclick="toggleResponse(this)"><span>500 Internal server error</span><span class="response-icon">+</span></div><div class="response-content"><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Internal server error"</span>
+  }
+}</pre></div></div>
+        </div>
+        <h3>Response Sample</h3>
+        <div class="code-block"><div class="code-header"><span class="code-lang">JSON</span><button class="copy-btn" onclick="copyBlock(this)">&#x29C9;</button></div>
+<pre>{
+  <span class="hl-key">"data"</span>: {
+    <span class="hl-key">"uuid"</span>: <span class="hl-str">"b8625b67-7142-cfd1-7b85-595cebfe4191"</span>,
+    <span class="hl-key">"name"</span>: <span class="hl-str">"MAERSK CHENNAI"</span>,
+    <span class="hl-key">"name_ais"</span>: <span class="hl-str">"MAERSK CHENNAI"</span>,
+    <span class="hl-key">"mmsi"</span>: <span class="hl-str">"566093000"</span>,
+    <span class="hl-key">"imo"</span>: <span class="hl-str">"9525338"</span>,
+    <span class="hl-key">"eni"</span>: <span class="hl-null">null</span>,
+    <span class="hl-key">"country_iso"</span>: <span class="hl-str">"SG"</span>,
+    <span class="hl-key">"country_name"</span>: <span class="hl-str">"Singapore"</span>,
+    <span class="hl-key">"callsign"</span>: <span class="hl-str">"9V9409"</span>,
+    <span class="hl-key">"type"</span>: <span class="hl-str">"Cargo - Hazard A (Major)"</span>,
+    <span class="hl-key">"type_specific"</span>: <span class="hl-str">"Container Ship"</span>,
+    <span class="hl-key">"gross_tonnage"</span>: <span class="hl-num">50869</span>,
+    <span class="hl-key">"deadweight"</span>: <span class="hl-num">68898</span>,
+    <span class="hl-key">"teu"</span>: <span class="hl-str">"4500"</span>,
+    <span class="hl-key">"liquid_gas"</span>: <span class="hl-null">null</span>,
+    <span class="hl-key">"length"</span>: <span class="hl-num">249.12</span>,
+    <span class="hl-key">"breadth"</span>: <span class="hl-num">37.4</span>,
+    <span class="hl-key">"draught_avg"</span>: <span class="hl-num">10.021295387634936</span>,
+    <span class="hl-key">"draught_max"</span>: <span class="hl-num">14.2</span>,
+    <span class="hl-key">"speed_avg"</span>: <span class="hl-num">7.4</span>,
+    <span class="hl-key">"speed_max"</span>: <span class="hl-num">20</span>,
+    <span class="hl-key">"year_built"</span>: <span class="hl-str">"2011"</span>,
+    <span class="hl-key">"is_navaid"</span>: <span class="hl-null">false</span>,
+    <span class="hl-key">"home_port"</span>: <span class="hl-str">"SINGAPORE"</span>
+  }
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENDPOINT 8 -->
+  <section class="doc-section" id="endpoint-8">
+    <h2>Endpoint 8: Port Finder</h2>
+    <p>Fetches port details by coordinates and radius, name, country code, or port type. At least one parameter must be provided.</p>
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <span class="method-badge">GET</span>
+        <span class="endpoint-url">https://api.jsoncargo.com/api/v1/port/find</span>
+        <button class="copy-btn" onclick="copyText('GET https://api.jsoncargo.com/api/v1/port/find', this)">&#x29C9;</button>
+      </div>
+      <div class="endpoint-body">
+        <h3>Query Parameters</h3>
+        <div class="table-wrap"><table><thead><tr><th>Parameter</th><th>Type</th></tr></thead><tbody>
+          <tr><td class="td-name">lat</td><td>number</td></tr>
+          <tr><td class="td-name">lon</td><td>number</td></tr>
+          <tr><td class="td-name">radius</td><td>number</td></tr>
+          <tr><td class="td-name">name</td><td>string</td></tr>
+          <tr><td class="td-name">country_iso</td><td>string</td></tr>
+          <tr><td class="td-name">port_type</td><td>string</td></tr>
+          <tr><td class="td-name">fuzzy</td><td>integer</td></tr>
+        </tbody></table></div>
+        <h3>Responses</h3>
+        <div class="responses">
+          <div class="response-item"><div class="response-trigger response-400" onclick="toggleResponse(this)"><span>400 Invalid request</span><span class="response-icon">+</span></div><div class="response-content"><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Invalid request"</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-404" onclick="toggleResponse(this)"><span>404 Port not found</span><span class="response-icon">+</span></div><div class="response-content"><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Port not found"</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-429" onclick="toggleResponse(this)"><span>429 Too many requests</span><span class="response-icon">+</span></div><div class="response-content"><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Too many requests"</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-500" onclick="toggleResponse(this)"><span>500 Internal server error</span><span class="response-icon">+</span></div><div class="response-content"><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Internal server error"</span>
+  }
+}</pre></div></div>
+        </div>
+        <h3>Response Sample</h3>
+        <div class="code-block"><div class="code-header"><span class="code-lang">JSON</span><button class="copy-btn" onclick="copyBlock(this)">&#x29C9;</button></div>
+<pre>{
+  <span class="hl-key">"data"</span>: [
+    {
+      <span class="hl-key">"port_name"</span>: <span class="hl-str">"LONDON"</span>,
+      <span class="hl-key">"port_code"</span>: <span class="hl-null">null</span>,
+      <span class="hl-key">"country"</span>: <span class="hl-null">null</span>,
+      <span class="hl-key">"lat"</span>: <span class="hl-num">51.49743</span>,
+      <span class="hl-key">"lon"</span>: <span class="hl-num">-0.04960075</span>,
+      <span class="hl-key">"port_type"</span>: <span class="hl-str">"Port"</span>,
+      <span class="hl-key">"size"</span>: <span class="hl-null">null</span>,
+      <span class="hl-key">"area"</span>: <span class="hl-null">null</span>,
+      <span class="hl-key">"city"</span>: <span class="hl-null">null</span>,
+      <span class="hl-key">"unlocode"</span>: <span class="hl-str">"GBLON"</span>
+    },
+    {
+      <span class="hl-key">"port_name"</span>: <span class="hl-str">"NEW LONDON"</span>,
+      <span class="hl-key">"port_code"</span>: <span class="hl-null">null</span>,
+      <span class="hl-key">"country"</span>: <span class="hl-null">null</span>,
+      <span class="hl-key">"lat"</span>: <span class="hl-num">41.35305</span>,
+      <span class="hl-key">"lon"</span>: <span class="hl-num">-72.08705</span>,
+      <span class="hl-key">"port_type"</span>: <span class="hl-str">"Port"</span>,
+      <span class="hl-key">"size"</span>: <span class="hl-null">null</span>,
+      <span class="hl-key">"area"</span>: <span class="hl-null">null</span>,
+      <span class="hl-key">"city"</span>: <span class="hl-null">null</span>,
+      <span class="hl-key">"unlocode"</span>: <span class="hl-str">"USNED"</span>
+    }
+  ]
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<!-- ENDPOINT 9 -->
+  <section class="doc-section" id="endpoint-9">
+    <h2>Endpoint 9: Terminal Finder API</h2>
+    <p>Retrieve terminal details using a UN/LOCODE.</p>
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <span class="method-badge">GET</span>
+        <span class="endpoint-url">https://api.jsoncargo.com/api/v1/terminal/</span>
+        <button class="copy-btn" onclick="copyText('GET https://api.jsoncargo.com/api/v1/terminal/', this)">&#x29C9;</button>
+      </div>
+      <div class="endpoint-body">
+        <h3>Query Parameters</h3>
+        <div class="param-list">
+          <div class="param-item"><span class="param-name">unlocode</span><span class="param-type">string</span><span class="param-required">required</span><span class="param-desc">Minimum 2 characters. UN/LOCODE of the port (e.g. CNCQI).</span></div>
+          <div class="param-item"><span class="param-name">page / limit</span><span class="param-type">string</span><span class="param-optional">optional</span></div>
+        </div>
+        <h3>Response Sample</h3>
+        <div class="code-block"><div class="code-header"><span class="code-lang">JSON</span><button class="copy-btn" onclick="copyBlock(this)">&#x29C9;</button></div>
+<pre>{
+    <span class="hl-key">"data"</span>: [{
+        <span class="hl-key">"unlocode"</span>: <span class="hl-str">"CNCQI"</span>,
+        <span class="hl-key">"alt_unlocode"</span>: <span class="hl-str">"CNCHQ"</span>,
+        <span class="hl-key">"code"</span>: <span class="hl-str">"CUNTAN"</span>,
+        <span class="hl-key">"terminal_name"</span>: <span class="hl-str">"CUNTAN TERMINAL"</span>,
+        <span class="hl-key">"company_name"</span>: <span class="hl-str">"CHONGQING INTERNATIONAL CONTAINER TERMINAL CO., LTD."</span>,
+        <span class="hl-key">"lat"</span>: <span class="hl-str">"29.618056"</span>,
+        <span class="hl-key">"lon"</span>: <span class="hl-str">"106.591667"</span>,
+        <span class="hl-key">"url"</span>: <span class="hl-str">"http://www.cqgj.com.cn/"</span>,
+        <span class="hl-key">"address"</span>: <span class="hl-str">"No. 306, Hai'er Road, Jiangbei District, Chongqing, China"</span>
+    }]
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ENDPOINT 10 -->
+  <section class="doc-section" id="endpoint-10">
+    <h2>Endpoint 10: Get API Key Usage Stats</h2>
+    <p>Check your current plan, total requests, requests used, and requests remaining.</p>
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <span class="method-badge">GET</span>
+        <span class="endpoint-url">https://api.jsoncargo.com/api/v1/api_key/stats</span>
+        <button class="copy-btn" onclick="copyText('GET https://api.jsoncargo.com/api/v1/api_key/stats', this)">&#x29C9;</button>
+      </div>
+      <div class="endpoint-body">
+        <p>No query parameters required. The response is based on the API key provided in the request header.</p>
+        <h3>Responses</h3>
+        <div class="responses">
+          <div class="response-item"><div class="response-trigger response-404" onclick="toggleResponse(this)"><span>404 API key stats not found</span><span class="response-icon">+</span></div><div class="response-content"><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"API key stats not found"</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-429" onclick="toggleResponse(this)"><span>429 Too many requests</span><span class="response-icon">+</span></div><div class="response-content"><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Too many requests"</span>
+  }
+}</pre></div></div>
+          <div class="response-item"><div class="response-trigger response-500" onclick="toggleResponse(this)"><span>500 Internal server error</span><span class="response-icon">+</span></div><div class="response-content"><pre>{
+  <span class="hl-key">"error"</span>: {
+    <span class="hl-key">"title"</span>: <span class="hl-str">"Internal server error"</span>
+  }
+}</pre></div></div>
+        </div>
+        <h3>Response Sample</h3>
+        <div class="code-block"><div class="code-header"><span class="code-lang">JSON</span><button class="copy-btn" onclick="copyBlock(this)">&#x29C9;</button></div>
+<pre>{
+  <span class="hl-key">"data"</span>: {
+    <span class="hl-key">"plan"</span>: <span class="hl-str">"MARINER"</span>,
+    <span class="hl-key">"requests_total"</span>: <span class="hl-num">10000</span>,
+    <span class="hl-key">"requests_made"</span>: <span class="hl-num">6</span>,
+    <span class="hl-key">"requests_available"</span>: <span class="hl-num">9994</span>
+  }
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CODE EXAMPLES -->
+  <section class="doc-section" id="languages">
+    <h2>Code Examples</h2>
+    <p>The examples below call the Get Container Details endpoint for container <code>MEDU9091004</code> at MSC. The same pattern applies to all endpoints.</p>
+    <div class="lang-tabs">
+      <button class="lang-tab active" onclick="switchLang('curl', this)">cURL</button>
+      <button class="lang-tab" onclick="switchLang('node', this)">Node.js</button>
+      <button class="lang-tab" onclick="switchLang('python', this)">Python</button>
+      <button class="lang-tab" onclick="switchLang('go', this)">Go</button>
+      <button class="lang-tab" onclick="switchLang('php', this)">PHP</button>
+      <button class="lang-tab" onclick="switchLang('ruby', this)">Ruby</button>
+      <button class="lang-tab" onclick="switchLang('java', this)">Java</button>
+    </div>
+    <div class="code-block" style="border-radius:0 var(--radius) var(--radius) var(--radius);margin-top:0">
+      <div class="code-header"><span class="code-lang" id="active-lang-label">cURL</span><button class="copy-btn" onclick="copyActivePanel()">&#x29C9;</button></div>
+      <div id="panel-curl" class="lang-panel active">
+<pre><span class="hl-kw">curl</span> --location <span class="hl-url">'https://api.jsoncargo.com/api/v1/containers/MEDU9091004/?shipping_line=MSC'</span> \
+  --header <span class="hl-str">'x-api-key: YOUR_API_KEY'</span></pre>
+      </div>
+      <div id="panel-node" class="lang-panel">
+<pre><span class="hl-kw">const</span> axios = <span class="hl-kw">require</span>(<span class="hl-str">'axios'</span>);
+axios.get(<span class="hl-str">'https://api.jsoncargo.com/api/v1/containers/MEDU9091004/?shipping_line=MSC'</span>, {
+  headers: { <span class="hl-str">'x-api-key'</span>: <span class="hl-str">'YOUR_API_KEY'</span> }
+}).then(res => console.log(res.data));</pre>
+      </div>
+      <div id="panel-python" class="lang-panel">
+<pre><span class="hl-kw">import</span> requests
+response = requests.get(
+  <span class="hl-str">'https://api.jsoncargo.com/api/v1/containers/MEDU9091004/?shipping_line=MSC'</span>,
+  headers={<span class="hl-str">'x-api-key'</span>: <span class="hl-str">'YOUR_API_KEY'</span>}
+)
+<span class="hl-kw">print</span>(response.json())</pre>
+      </div>
+      <div id="panel-go" class="lang-panel">
+<pre><span class="hl-kw">package</span> main
+<span class="hl-kw">import</span> (<span class="hl-str">"fmt"</span>; <span class="hl-str">"io"</span>; <span class="hl-str">"net/http"</span>)
+<span class="hl-kw">func</span> main() {
+  req, _ := http.NewRequest(<span class="hl-str">"GET"</span>, <span class="hl-str">"https://api.jsoncargo.com/api/v1/containers/MEDU9091004/?shipping_line=MSC"</span>, nil)
+  req.Header.Add(<span class="hl-str">"x-api-key"</span>, <span class="hl-str">"YOUR_API_KEY"</span>)
+  res, _ := http.DefaultClient.Do(req)
+  defer res.Body.Close()
+  body, _ := io.ReadAll(res.Body)
+  fmt.Println(string(body))
+}</pre>
+      </div>
+      <div id="panel-php" class="lang-panel">
+<pre><span class="hl-kw">&lt;?php</span>
+$curl = curl_init();
+curl_setopt_array($curl, [
+  CURLOPT_URL => <span class="hl-str">'https://api.jsoncargo.com/api/v1/containers/MEDU9091004/?shipping_line=MSC'</span>,
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_HTTPHEADER => [<span class="hl-str">'x-api-key: YOUR_API_KEY'</span>],
+]);
+echo curl_exec($curl);
+curl_close($curl);</pre>
+      </div>
+      <div id="panel-ruby" class="lang-panel">
+<pre><span class="hl-kw">require</span> <span class="hl-str">"uri"</span>; <span class="hl-kw">require</span> <span class="hl-str">"net/http"</span>
+url = URI(<span class="hl-str">"https://api.jsoncargo.com/api/v1/containers/MEDU9091004/?shipping_line=MSC"</span>)
+req = Net::HTTP::Get.new(url)
+req[<span class="hl-str">"x-api-key"</span>] = <span class="hl-str">"YOUR_API_KEY"</span>
+puts Net::HTTP.start(url.host){ |h| h.request(req) }.read_body</pre>
+      </div>
+      <div id="panel-java" class="lang-panel">
+<pre>OkHttpClient client = <span class="hl-kw">new</span> OkHttpClient();
+Request request = <span class="hl-kw">new</span> Request.Builder()
+  .url(<span class="hl-str">"https://api.jsoncargo.com/api/v1/containers/MEDU9091004/?shipping_line=MSC"</span>)
+  .addHeader(<span class="hl-str">"x-api-key"</span>, <span class="hl-str">"YOUR_API_KEY"</span>)
+  .build();
+System.out.println(client.newCall(request).execute().body().string());</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- SDKs -->
+  <section class="doc-section" id="sdks">
+    <h2>SDKs &amp; Libraries</h2>
+    <p>Official client libraries for JSONCargo. Each SDK wraps the full API so you can start tracking in minutes without writing HTTP boilerplate.</p>
+
+    <div class="sdk-tabs">
+      <button class="sdk-tab active" onclick="switchSdk('python', this)">Python</button>
+      <button class="sdk-tab" onclick="switchSdk('node', this)">Node.js</button>
+      <button class="sdk-tab" onclick="switchSdk('go', this)">Go</button>
+    </div>
+
+    <div class="sdk-panel active" id="sdk-python">
+      <div class="sdk-meta">
+        <span class="sdk-meta-label">GitHub</span>
+        <a href="https://github.com/jsoncargo/jsoncargo-python" target="_blank">jsoncargo/jsoncargo-python</a>
+      </div>
+      <h3>Install</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyBlock(this)">&#x29C9;</button></div>
+        <pre>pip install jsoncargo</pre>
+      </div>
+      <h3>Example</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn" onclick="copyBlock(this)">&#x29C9;</button></div>
+<pre><span class="hl-kw">from</span> jsoncargo <span class="hl-kw">import</span> Client
+
+client = Client(api_key=<span class="hl-str">"YOUR_API_KEY"</span>)
+container = client.container.get(tracking_number=<span class="hl-str">"MEDU9091004"</span>)
+<span class="hl-kw">print</span>(container.status, container.last_location, container.eta_final_destination)</pre>
+      </div>
+    </div>
+
+    <div class="sdk-panel" id="sdk-node">
+      <div class="sdk-meta">
+        <span class="sdk-meta-label">GitHub</span>
+        <a href="https://github.com/jsoncargo/jsoncargo-node" target="_blank">jsoncargo/jsoncargo-node</a>
+      </div>
+      <h3>Install</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyBlock(this)">&#x29C9;</button></div>
+        <pre>npm install jsoncargo</pre>
+      </div>
+      <h3>Example</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">Node.js</span><button class="copy-btn" onclick="copyBlock(this)">&#x29C9;</button></div>
+<pre><span class="hl-kw">const</span> { JSONCargo } = <span class="hl-kw">require</span>(<span class="hl-str">'jsoncargo'</span>);
+
+<span class="hl-kw">const</span> client = <span class="hl-kw">new</span> JSONCargo({ apiKey: <span class="hl-str">'YOUR_API_KEY'</span> });
+<span class="hl-kw">const</span> container = <span class="hl-kw">await</span> client.container.get({ trackingNumber: <span class="hl-str">'MEDU9091004'</span> });
+console.log(container.status, container.lastLocation, container.etaFinalDestination);</pre>
+      </div>
+    </div>
+
+    <div class="sdk-panel" id="sdk-go">
+      <div class="sdk-meta">
+        <span class="sdk-meta-label">GitHub</span>
+        <a href="https://github.com/jsoncargo/jsoncargo-go" target="_blank">jsoncargo/jsoncargo-go</a>
+      </div>
+      <h3>Install</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyBlock(this)">&#x29C9;</button></div>
+        <pre>go get github.com/jsoncargo/jsoncargo-go</pre>
+      </div>
+      <h3>Example</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">Go</span><button class="copy-btn" onclick="copyBlock(this)">&#x29C9;</button></div>
+<pre>client := jsoncargo.NewClient(<span class="hl-str">"YOUR_API_KEY"</span>)
+container, err := client.Container.Get(jsoncargo.ContainerParams{TrackingNumber: <span class="hl-str">"MEDU9091004"</span>})
+fmt.Printf(<span class="hl-str">"%s - %s\n"</span>, container.Status, container.LastLocation)</pre>
+      </div>
+    </div>
+
+  </section>
+
+    <!-- SUPPORT -->
+  <section class="doc-section" id="support">
+    <h2>Need Help or Have Questions?</h2>
+    <p>If you need help or have questions about the API, our team is ready to assist.</p>
+    <div class="contact-grid">
+      <div class="contact-card">
+        <div class="contact-card-icon">&#128736;</div>
+        <div class="contact-card-label">Technical Support</div>
+        <a href="mailto:support@jsoncargo.com">support@jsoncargo.com</a>
+      </div>
+      <div class="contact-card">
+        <div class="contact-card-icon">&#128172;</div>
+        <div class="contact-card-label">General Inquiries</div>
+        <a href="mailto:info@jsoncargo.com">info@jsoncargo.com</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- RIGHT CONTEXT PANEL -->
+<aside class="context-panel" id="context-panel">
+
+  <div id="ctx-empty" class="ctx-state">
+    <p style="color:var(--text-muted);font-size:12px;line-height:1.6;padding:4px 0">Quick reference info will appear here as you scroll through each section.</p>
+  </div>
+
+  <!-- Container endpoints: ep1, ep2 -->
+  <div id="ctx-container" class="ctx-state hidden">
+    <div class="context-title">Quick Reference</div>
+    <div class="context-credit-endpoint" id="ctx-container-ep-name" style="margin-bottom:12px"></div>
+    <div class="context-card">
+      <div class="context-title">Shipping Line Params</div>
+      <table><thead><tr><th>Parameter</th></tr></thead><tbody>
+        <tr><td>MAERSK</td></tr>
+        <tr><td>HAPAG_LLOYD</td></tr>
+        <tr><td>HMM</td></tr>
+        <tr><td>ONE</td></tr>
+        <tr><td>EVERGREEN</td></tr>
+        <tr><td>MSC</td></tr>
+        <tr><td>CMA_CGM</td></tr>
+        <tr><td>COSCO</td></tr>
+        <tr><td>ZIM</td></tr>
+        <tr><td>YANG_MING</td></tr>
+        <tr><td>PIL</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+
+  <!-- Vessel endpoints: ep3-ep7 -->
+  <div id="ctx-vessel" class="ctx-state hidden">
+    <div class="context-title">Quick Reference</div>
+    <div class="context-credit-endpoint" id="ctx-vessel-ep-name" style="margin-bottom:12px"></div>
+    <div class="context-card">
+      <div class="context-title">Vessel Identifiers</div>
+      <table><thead><tr><th>Param</th><th>Type</th></tr></thead><tbody>
+        <tr><td>uuid</td><td>string</td></tr>
+        <tr><td>mmsi</td><td>string</td></tr>
+        <tr><td>imo</td><td>string</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+
+  <!-- Port/Terminal endpoints: ep8, ep9 -->
+  <div id="ctx-port" class="ctx-state hidden">
+    <div class="context-title">Quick Reference</div>
+    <div class="context-credit-endpoint" id="ctx-port-ep-name" style="margin-bottom:12px"></div>
+    <div class="context-card">
+      <div class="context-title">Search Params</div>
+      <table><thead><tr><th>Param</th><th>Type</th></tr></thead><tbody>
+        <tr><td>name</td><td>string</td></tr>
+        <tr><td>lat / lon</td><td>number</td></tr>
+        <tr><td>radius</td><td>number</td></tr>
+        <tr><td>country_iso</td><td>string</td></tr>
+        <tr><td>fuzzy</td><td>integer</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+
+  <!-- API Key Stats: ep10 -->
+  <div id="ctx-stats" class="ctx-state hidden">
+    <div class="context-title">Quick Reference</div>
+    <div class="context-credit-endpoint" id="ctx-stats-ep-name" style="margin-bottom:12px"></div>
+    <div class="context-card">
+      <div class="context-title">Response Fields</div>
+      <table><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+        <tr><td>plan</td><td>string</td></tr>
+        <tr><td>requests_total</td><td>integer</td></tr>
+        <tr><td>requests_made</td><td>integer</td></tr>
+        <tr><td>requests_available</td><td>integer</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+
+  <!-- Overview sections -->
+  <div id="ctx-overview" class="ctx-state hidden">
+    <div class="context-title">Quick Reference</div>
+    <div class="context-credit-endpoint" id="ctx-overview-ep-name" style="margin-bottom:12px;font-size:12px;font-weight:700;color:var(--accent)"></div>
+    <div class="context-card">
+      <div class="context-title">Auth Header</div>
+      <table><thead><tr><th>Header</th></tr></thead><tbody>
+        <tr><td>x-api-key</td></tr>
+      </tbody></table>
+    </div>
+    <div class="context-card">
+      <div class="context-title">Shipping Lines</div>
+      <table><thead><tr><th>Parameter</th></tr></thead><tbody>
+        <tr><td>MAERSK</td></tr><tr><td>HAPAG_LLOYD</td></tr>
+        <tr><td>HMM</td></tr><tr><td>ONE</td></tr>
+        <tr><td>EVERGREEN</td></tr><tr><td>MSC</td></tr>
+        <tr><td>CMA_CGM</td></tr><tr><td>COSCO</td></tr>
+        <tr><td>ZIM</td></tr><tr><td>YANG_MING</td></tr>
+        <tr><td>PIL</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+
+</aside>
+
+</div>
+
+<script>
+  // UI helpers
+  function toggleResponse(t) { t.closest('.response-item').classList.toggle('open'); }
+  function copyText(text, btn) {
+    navigator.clipboard.writeText(text).then(() => {
+      btn.innerHTML = '&#x2713;'; btn.classList.add('copied');
+      setTimeout(() => { btn.innerHTML = '&#x29C9;'; btn.classList.remove('copied'); }, 1500);
+    });
+  }
+  function copyBlock(btn) { copyText(btn.closest('.code-block').querySelector('pre').innerText, btn); }
+  function copyActivePanel() {
+    copyText(
+      document.querySelector('.lang-panel.active pre').innerText,
+      document.querySelector('#active-lang-label').closest('.code-header').querySelector('.copy-btn')
+    );
+  }
+  function switchSdk(sdk, tabEl) {
+    document.querySelectorAll('.sdk-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.sdk-panel').forEach(p => p.classList.remove('active'));
+    tabEl.classList.add('active');
+    document.getElementById('sdk-' + sdk).classList.add('active');
+  }
+
+  function switchLang(lang, tabEl) {
+    document.querySelectorAll('.lang-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.lang-panel').forEach(p => p.classList.remove('active'));
+    tabEl.classList.add('active');
+    document.getElementById('panel-' + lang).classList.add('active');
+    document.getElementById('active-lang-label').textContent = tabEl.textContent;
+  }
+
+  // Context panel config: section id -> { panel, label }
+  const ctxConfig = {
+    'getting-started':      { panel: 'ctx-overview',   label: 'Overview' },
+    'authentication':       { panel: 'ctx-overview',   label: 'Authentication' },
+    'shipping-lines':       { panel: 'ctx-overview',   label: 'Shipping Lines' },
+    'usage':                { panel: 'ctx-overview',   label: 'API Usage' },
+    'errors':               { panel: 'ctx-overview',   label: 'Common Errors' },
+    'endpoint-1':           { panel: 'ctx-container',  label: 'Get Container Details' },
+    'endpoint-2':           { panel: 'ctx-container',  label: 'Get Containers from BoL' },
+    'endpoint-3':           { panel: 'ctx-vessel',     label: 'Basic Vessel Tracking' },
+    'endpoint-4':           { panel: 'ctx-vessel',     label: 'Pro Vessel Tracking' },
+    'endpoint-5':           { panel: 'ctx-vessel',     label: 'Bulk Vessel Tracking' },
+    'endpoint-6':           { panel: 'ctx-vessel',     label: 'Vessel Finder' },
+    'endpoint-7':           { panel: 'ctx-vessel',     label: 'Vessel Specs' },
+    'endpoint-8':           { panel: 'ctx-port',       label: 'Port Finder' },
+    'endpoint-9':           { panel: 'ctx-port',       label: 'Terminal Finder' },
+    'endpoint-10':          { panel: 'ctx-stats',      label: 'API Key Stats' },
+    'sdks':                 { panel: null },
+    'languages':            { panel: null },
+    'support':              { panel: null }
+  };
+
+  function showCtx(id) {
+    document.querySelectorAll('.ctx-state').forEach(el => el.classList.add('hidden'));
+    const cfg = ctxConfig[id];
+    const panelId = cfg ? cfg.panel : null;
+    const el = document.getElementById(panelId || 'ctx-empty');
+    if (el) el.classList.remove('hidden');
+
+    if (cfg && panelId) {
+      // Set endpoint name label
+      const nameEl = document.getElementById(panelId + '-ep-name');
+      if (nameEl) nameEl.textContent = cfg.label || '';
+    }
+  }
+
+  // Scrollspy
+  const sections = document.querySelectorAll('.doc-section');
+  const navLinks = document.querySelectorAll('.sidebar a');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const id = entry.target.id;
+      navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id));
+      showCtx(id);
+    });
+  }, { rootMargin: '-15% 0px -70% 0px' });
+  sections.forEach(s => obs.observe(s));
+
+  // Init: show empty state on load
+  showCtx(null);
+</script>
+</body>
+</html>
