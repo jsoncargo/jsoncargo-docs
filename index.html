@@ -247,16 +247,6 @@
     .contact-grid { grid-template-columns: 1fr; }
   }
 
-  /* SDK TABS */
-  .sdk-tabs { display: flex; gap: 4px; margin-bottom: -1px; }
-  .sdk-tab { padding: 8px 20px; border-radius: 6px 6px 0 0; font-size: 13px; font-weight: 600; cursor: pointer; background: var(--bg3); color: var(--text-muted); border: 1px solid var(--border); border-bottom-color: var(--bg3); transition: color .2s, background .2s; font-family: var(--font); }
-  .sdk-tab.active { background: var(--bg2); color: var(--accent); border-bottom-color: var(--bg2); }
-  .sdk-tab:hover:not(.active) { color: var(--text); }
-  .sdk-panel { display: none; background: var(--bg2); border: 1px solid var(--border); border-radius: 0 var(--radius) var(--radius) var(--radius); padding: 20px; }
-  .sdk-panel.active { display: block; }
-  .sdk-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
-  .sdk-meta-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); }
-  .sdk-meta a { font-size: 13px; font-family: monospace; color: var(--accent); }
 </style>
 </head>
 <body>
@@ -300,7 +290,6 @@
   <a href="#endpoint-10">10. API Key Stats</a>
   <div class="sidebar-label">Resources</div>
   <a href="#languages">Code Examples</a>
-  <a href="#sdks">SDKs & Libraries</a>
   <a href="#support">Support</a>
 </aside>
 
@@ -1349,80 +1338,6 @@ System.out.println(client.newCall(request).execute().body().string());</pre>
     </div>
   </section>
 
-  <!-- SDKs -->
-  <section class="doc-section" id="sdks">
-    <h2>SDKs &amp; Libraries</h2>
-    <p>Official client libraries for JSONCargo. Each SDK wraps the full API so you can start tracking in minutes without writing HTTP boilerplate.</p>
-
-    <div class="sdk-tabs">
-      <button class="sdk-tab active" onclick="switchSdk('python', this)">Python</button>
-      <button class="sdk-tab" onclick="switchSdk('node', this)">Node.js</button>
-      <button class="sdk-tab" onclick="switchSdk('go', this)">Go</button>
-    </div>
-
-    <div class="sdk-panel active" id="sdk-python">
-      <div class="sdk-meta">
-        <span class="sdk-meta-label">GitHub</span>
-        <a href="https://github.com/jsoncargo/jsoncargo-python" target="_blank">jsoncargo/jsoncargo-python</a>
-      </div>
-      <h3>Install</h3>
-      <div class="code-block">
-        <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyBlock(this)">&#x29C9;</button></div>
-        <pre>pip install jsoncargo</pre>
-      </div>
-      <h3>Example</h3>
-      <div class="code-block">
-        <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn" onclick="copyBlock(this)">&#x29C9;</button></div>
-<pre><span class="hl-kw">from</span> jsoncargo <span class="hl-kw">import</span> Client
-
-client = Client(api_key=<span class="hl-str">"YOUR_API_KEY"</span>)
-container = client.container.get(tracking_number=<span class="hl-str">"MEDU9091004"</span>)
-<span class="hl-kw">print</span>(container.status, container.last_location, container.eta_final_destination)</pre>
-      </div>
-    </div>
-
-    <div class="sdk-panel" id="sdk-node">
-      <div class="sdk-meta">
-        <span class="sdk-meta-label">GitHub</span>
-        <a href="https://github.com/jsoncargo/jsoncargo-node" target="_blank">jsoncargo/jsoncargo-node</a>
-      </div>
-      <h3>Install</h3>
-      <div class="code-block">
-        <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyBlock(this)">&#x29C9;</button></div>
-        <pre>npm install jsoncargo</pre>
-      </div>
-      <h3>Example</h3>
-      <div class="code-block">
-        <div class="code-header"><span class="code-lang">Node.js</span><button class="copy-btn" onclick="copyBlock(this)">&#x29C9;</button></div>
-<pre><span class="hl-kw">const</span> { JSONCargo } = <span class="hl-kw">require</span>(<span class="hl-str">'jsoncargo'</span>);
-
-<span class="hl-kw">const</span> client = <span class="hl-kw">new</span> JSONCargo({ apiKey: <span class="hl-str">'YOUR_API_KEY'</span> });
-<span class="hl-kw">const</span> container = <span class="hl-kw">await</span> client.container.get({ trackingNumber: <span class="hl-str">'MEDU9091004'</span> });
-console.log(container.status, container.lastLocation, container.etaFinalDestination);</pre>
-      </div>
-    </div>
-
-    <div class="sdk-panel" id="sdk-go">
-      <div class="sdk-meta">
-        <span class="sdk-meta-label">GitHub</span>
-        <a href="https://github.com/jsoncargo/jsoncargo-go" target="_blank">jsoncargo/jsoncargo-go</a>
-      </div>
-      <h3>Install</h3>
-      <div class="code-block">
-        <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyBlock(this)">&#x29C9;</button></div>
-        <pre>go get github.com/jsoncargo/jsoncargo-go</pre>
-      </div>
-      <h3>Example</h3>
-      <div class="code-block">
-        <div class="code-header"><span class="code-lang">Go</span><button class="copy-btn" onclick="copyBlock(this)">&#x29C9;</button></div>
-<pre>client := jsoncargo.NewClient(<span class="hl-str">"YOUR_API_KEY"</span>)
-container, err := client.Container.Get(jsoncargo.ContainerParams{TrackingNumber: <span class="hl-str">"MEDU9091004"</span>})
-fmt.Printf(<span class="hl-str">"%s - %s\n"</span>, container.Status, container.LastLocation)</pre>
-      </div>
-    </div>
-
-  </section>
-
     <!-- SUPPORT -->
   <section class="doc-section" id="support">
     <h2>Need Help or Have Questions?</h2>
@@ -1560,13 +1475,6 @@ fmt.Printf(<span class="hl-str">"%s - %s\n"</span>, container.Status, container.
       document.querySelector('#active-lang-label').closest('.code-header').querySelector('.copy-btn')
     );
   }
-  function switchSdk(sdk, tabEl) {
-    document.querySelectorAll('.sdk-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.sdk-panel').forEach(p => p.classList.remove('active'));
-    tabEl.classList.add('active');
-    document.getElementById('sdk-' + sdk).classList.add('active');
-  }
-
   function switchLang(lang, tabEl) {
     document.querySelectorAll('.lang-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.lang-panel').forEach(p => p.classList.remove('active'));
@@ -1592,7 +1500,6 @@ fmt.Printf(<span class="hl-str">"%s - %s\n"</span>, container.Status, container.
     'endpoint-8':           { panel: 'ctx-port',       label: 'Port Finder' },
     'endpoint-9':           { panel: 'ctx-port',       label: 'Terminal Finder' },
     'endpoint-10':          { panel: 'ctx-stats',      label: 'API Key Stats' },
-    'sdks':                 { panel: null },
     'languages':            { panel: null },
     'support':              { panel: null }
   };
