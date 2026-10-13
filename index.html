@@ -159,7 +159,7 @@
   .response-400, .response-404 { background: var(--red); color: var(--red-fg); }
   .response-429 { background: var(--amber); color: var(--amber-fg); }
   .response-500 { background: var(--red); color: var(--red-fg); }
-  .response-401, .response-502 { background: var(--red); color: var(--red-fg); }
+  .response-401, .response-424 { background: var(--red); color: var(--red-fg); }
   .resp-note { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
   .resp-ex-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin: 10px 0 -4px; }
   .response-content pre { padding: 10px 0; }
@@ -391,7 +391,7 @@
         <div class="error-card-icon">&#x21BB;</div>
         <div class="error-card-body">
           <div class="error-card-title">Tracking Data Temporarily Unavailable</div>
-          <div class="error-card-desc">A <code>502</code> means tracking data for this container or Bill of Lading can't be returned right now. Retry later if the response says <code>"retryable": true</code>.</div>
+          <div class="error-card-desc">A <code>424</code> means tracking data for this container or Bill of Lading can't be returned right now. Retry later if the response says <code>"retryable": true</code>.</div>
         </div>
       </div>
     </div>
@@ -406,7 +406,7 @@
   }
 }</pre>
     </div>
-    <div class="table-wrap"><table><thead><tr><th>code</th><th>HTTP</th><th>Retryable</th><th>Meaning</th></tr></thead><tbody><tr><td class="td-name">invalid_request</td><td>400</td><td>No</td><td>The request is malformed: a missing or invalid parameter, or an unsupported shipping line. <code>title</code> explains what to fix.</td></tr><tr><td class="td-name">unknown_resource</td><td>404</td><td>No</td><td>No tracking data was found for this number and shipping line.</td></tr><tr><td class="td-name">internal_error</td><td>500</td><td>Yes</td><td>An unexpected error on our side.</td></tr><tr><td class="td-name">content_unavailable</td><td>502</td><td>No</td><td>Tracking data for this request is not available.</td></tr><tr><td class="td-name">upstream_unavailable</td><td>502</td><td>Yes</td><td>Tracking data is temporarily unavailable. Retry later.</td></tr></tbody></table></div>
+    <div class="table-wrap"><table><thead><tr><th>code</th><th>HTTP</th><th>Retryable</th><th>Meaning</th></tr></thead><tbody><tr><td class="td-name">invalid_request</td><td>400</td><td>No</td><td>The request is malformed: a missing or invalid parameter, or an unsupported shipping line. <code>title</code> explains what to fix.</td></tr><tr><td class="td-name">unknown_resource</td><td>404</td><td>No</td><td>No tracking data was found for this number and shipping line.</td></tr><tr><td class="td-name">internal_error</td><td>500</td><td>Yes</td><td>An unexpected error on our side.</td></tr><tr><td class="td-name">content_unavailable</td><td>424</td><td>No</td><td>Tracking data for this request is not available.</td></tr><tr><td class="td-name">upstream_unavailable</td><td>424</td><td>Yes</td><td>Tracking data is temporarily unavailable. Retry later.</td></tr></tbody></table></div>
     <p>API-key errors (<code>401</code>, <code>403</code>, <code>429</code>) can come from any endpoint and contain <code>title</code> only. Errors from the vessel, port and API key endpoints also contain <code>title</code> only.</p>
     <p style="margin-top:16px">Still experiencing issues? Contact us at <a href="mailto:support@jsoncargo.com">support@jsoncargo.com</a></p>
   </section>
@@ -510,7 +510,7 @@
     <span class="hl-key">"retryable"</span>: <span class="hl-null">true</span>
   }
 }</pre></div></div>
-          <div class="response-item"><div class="response-trigger response-502" onclick="toggleResponse(this)"><span>502 Tracking data unavailable</span><span class="response-icon">+</span></div><div class="response-content"><p class="resp-note"><code>upstream_unavailable</code> (retryable) or <code>content_unavailable</code> (not retryable): tracking data for this request is temporarily unavailable, or is not available for this shipment.</p><div class="resp-ex-label">Temporarily unavailable (retryable)</div><pre>{
+          <div class="response-item"><div class="response-trigger response-424" onclick="toggleResponse(this)"><span>424 Tracking data unavailable</span><span class="response-icon">+</span></div><div class="response-content"><p class="resp-note"><code>upstream_unavailable</code> (retryable) or <code>content_unavailable</code> (not retryable): tracking data for this request is temporarily unavailable, or is not available for this shipment.</p><div class="resp-ex-label">Temporarily unavailable (retryable)</div><pre>{
   <span class="hl-key">"error"</span>: {
     <span class="hl-key">"code"</span>: <span class="hl-str">"upstream_unavailable"</span>,
     <span class="hl-key">"title"</span>: <span class="hl-str">"Tracking data is temporarily unavailable. Please try again later."</span>,
@@ -638,7 +638,7 @@
     <span class="hl-key">"retryable"</span>: <span class="hl-null">true</span>
   }
 }</pre></div></div>
-          <div class="response-item"><div class="response-trigger response-502" onclick="toggleResponse(this)"><span>502 Tracking data unavailable</span><span class="response-icon">+</span></div><div class="response-content"><p class="resp-note"><code>upstream_unavailable</code> (retryable) or <code>content_unavailable</code> (not retryable): tracking data for this request is temporarily unavailable, or is not available for this shipment.</p><div class="resp-ex-label">Temporarily unavailable (retryable)</div><pre>{
+          <div class="response-item"><div class="response-trigger response-424" onclick="toggleResponse(this)"><span>424 Tracking data unavailable</span><span class="response-icon">+</span></div><div class="response-content"><p class="resp-note"><code>upstream_unavailable</code> (retryable) or <code>content_unavailable</code> (not retryable): tracking data for this request is temporarily unavailable, or is not available for this shipment.</p><div class="resp-ex-label">Temporarily unavailable (retryable)</div><pre>{
   <span class="hl-key">"error"</span>: {
     <span class="hl-key">"code"</span>: <span class="hl-str">"upstream_unavailable"</span>,
     <span class="hl-key">"title"</span>: <span class="hl-str">"Tracking data is temporarily unavailable. Please try again later."</span>,
